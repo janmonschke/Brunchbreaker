@@ -10,7 +10,6 @@ class exports.FieldView extends Backbone.View
     @color_padding = 3
 
   render: ->
-    console.log 'TODO: generate a real dom representation from the field', @model.get('fields')
     colors = @model.get('colors')
     fields = @model.get('fields')
     for y in [0..@model.get('width')-1]

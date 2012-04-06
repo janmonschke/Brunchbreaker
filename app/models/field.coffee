@@ -26,16 +26,51 @@ class exports.Field extends Backbone.Model
     bubble.bind 'hovered', @calculateHighlights
 
   calculateHighlights: (bubble) =>
+    # remove the highlight state from all but the current bubble
     @forEachBubble (currentBubble) =>
       if bubble != currentBubble
         currentBubble.unhighlight()
 
+    # find all neighbors
+    neighbors = @getNeighborsOf bubble
+
+    for neighbor in neighbors
+      neighbor.highlight()
+
+  ### Execute fn with each bubble ###
   forEachBubble: (fn) ->
     return unless fn
     fields = @get 'fields'
     for y in [0..@get 'height']
       for x in [0..@get 'width']
-        fn fields[y][x]
+        fn fields[y][x], x, y
 
-  get_neighbours_of: (x, y) ->
-    [{x:1, y:2}]
+  ### Returns the array position of the current bubble ###
+  getArrayPosition: (bubble) ->
+    pos = x: -1, y: -1
+    @forEachBubble (curr, x, y) ->
+      if curr is bubble
+        pos.x = x
+        pos.y = y
+    pos
+
+  ### Also includes the current bubble ###
+  getNeighborsOf: (bubble) ->
+    checklist = [bubble]
+    checkcolor = bubble.get 'color'
+    result = []
+    fields = @get 'fields'
+    width = @get 'width'
+    height = @get 'height'
+
+    # a basic flood fill algorithm to get all neighbors
+    while checklist.length > 0
+      curr = checklist.pop()
+      if curr? and curr.get('color') == checkcolor and not _(result).include curr
+        result.push curr
+        pos = @getArrayPosition curr
+        checklist.push fields[pos.y][pos.x+1] if pos.x+1 < width # to the right
+        checklist.push fields[pos.y+1][pos.x] if pos.y+1 < height # underneath
+        checklist.push fields[pos.y][pos.x-1] if pos.x-1 >= 0 # to the left
+        checklist.push fields[pos.y-1][pos.x] if pos.y-1 >= 0 # above
+    result

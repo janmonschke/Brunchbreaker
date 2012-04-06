@@ -5,3 +5,6 @@ class exports.Bubble extends Backbone.Model
 
   unhighlight: ->
     @set highlighted: false
+
+  highlight: ->
+    @set highlighted: true

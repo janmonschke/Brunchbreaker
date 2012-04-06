@@ -11815,7 +11815,6 @@ window.jQuery = window.$ = jQuery;
 
     FieldView.prototype.render = function() {
       var bv, colors, fields, x, y, _ref, _ref2;
-      console.log('TODO: generate a real dom representation from the field', this.model.get('fields'));
       colors = this.model.get('colors');
       fields = this.model.get('fields');
       for (y = 0, _ref = this.model.get('width') - 1; 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
@@ -12041,6 +12040,12 @@ window.jQuery = window.$ = jQuery;
       });
     };
 
+    Bubble.prototype.highlight = function() {
+      return this.set({
+        highlighted: true
+      });
+    };
+
     return Bubble;
 
   })(Backbone.Model);
@@ -12104,11 +12109,22 @@ window.jQuery = window.$ = jQuery;
     };
 
     Field.prototype.calculateHighlights = function(bubble) {
-      var _this = this;
-      return this.forEachBubble(function(currentBubble) {
+      var neighbor, neighbors, _i, _len, _results,
+        _this = this;
+      this.forEachBubble(function(currentBubble) {
         if (bubble !== currentBubble) return currentBubble.unhighlight();
       });
+      neighbors = this.getNeighborsOf(bubble);
+      _results = [];
+      for (_i = 0, _len = neighbors.length; _i < _len; _i++) {
+        neighbor = neighbors[_i];
+        _results.push(neighbor.highlight());
+      }
+      return _results;
     };
+
+    /* Execute fn with each bubble
+    */
 
     Field.prototype.forEachBubble = function(fn) {
       var fields, x, y, _ref, _results;
@@ -12120,7 +12136,7 @@ window.jQuery = window.$ = jQuery;
           var _ref2, _results2;
           _results2 = [];
           for (x = 0, _ref2 = this.get('width'); 0 <= _ref2 ? x <= _ref2 : x >= _ref2; 0 <= _ref2 ? x++ : x--) {
-            _results2.push(fn(fields[y][x]));
+            _results2.push(fn(fields[y][x], x, y));
           }
           return _results2;
         }).call(this));
@@ -12128,13 +12144,47 @@ window.jQuery = window.$ = jQuery;
       return _results;
     };
 
-    Field.prototype.get_neighbours_of = function(x, y) {
-      return [
-        {
-          x: 1,
-          y: 2
+    /* Returns the array position of the current bubble
+    */
+
+    Field.prototype.getArrayPosition = function(bubble) {
+      var pos;
+      pos = {
+        x: -1,
+        y: -1
+      };
+      this.forEachBubble(function(curr, x, y) {
+        if (curr === bubble) {
+          pos.x = x;
+          return pos.y = y;
         }
-      ];
+      });
+      return pos;
+    };
+
+    /* Also includes the current bubble
+    */
+
+    Field.prototype.getNeighborsOf = function(bubble) {
+      var checkcolor, checklist, curr, fields, height, pos, result, width;
+      checklist = [bubble];
+      checkcolor = bubble.get('color');
+      result = [];
+      fields = this.get('fields');
+      width = this.get('width');
+      height = this.get('height');
+      while (checklist.length > 0) {
+        curr = checklist.pop();
+        if ((curr != null) && curr.get('color') === checkcolor && !_(result).include(curr)) {
+          result.push(curr);
+          pos = this.getArrayPosition(curr);
+          if (pos.x + 1 < width) checklist.push(fields[pos.y][pos.x + 1]);
+          if (pos.y + 1 < height) checklist.push(fields[pos.y + 1][pos.x]);
+          if (pos.x - 1 >= 0) checklist.push(fields[pos.y][pos.x - 1]);
+          if (pos.y - 1 >= 0) checklist.push(fields[pos.y - 1][pos.x]);
+        }
+      }
+      return result;
     };
 
     return Field;
