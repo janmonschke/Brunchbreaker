@@ -226,7 +226,7 @@ a{color:#f95a5a;text-decoration:none}
 ul,ol{margin:0 1.5em 1.5em 0;list-style-type:none}
 #content{width:605px;margin:0 auto;margin-top:40px;margin-bottom:60px}
 #props{position:relative;top:36px;font-size:18px;padding-left:373px;color:#eee;font-style:italic}
-.bubble{position:absolute}
+.bubble{position:absolute;-moz-transition:top .3s ease-in;-webkit-transition:top .3s ease-in}
 html{margin:0;padding:0;border:0}
 body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,code,del,dfn,em,img,q,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,dialog,figure,footer,header,hgroup,nav,section{margin:0;padding:0;border:0;font-weight:inherit;font-style:inherit;font-size:100%;font-family:inherit;vertical-align:baseline}
 article,aside,dialog,figure,footer,header,hgroup,nav,section{display:block}

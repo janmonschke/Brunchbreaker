@@ -9,18 +9,46 @@ class exports.FieldView extends Backbone.View
     @color_height = 20
     @color_padding = 3
 
-  render: ->
+    @model.bind 'invalidate', @updatePositions
+
+  render: =>
+    console.log 'render'
+    @$el.html ''
+    @bubbleViews = []
     colors = @model.get('colors')
-    fields = @model.get('fields')
+    bubbles = @model.get('bubbles')
+
     for y in [0..@model.get('width')-1]
+      @bubbleViews.push []
       for x in [0..@model.get('height')-1]
+        bubble = bubbles[y][x]
         bv = new BubbleView
-          model: fields[y][x]
+          model: bubble
         , @color_width, @color_height
 
-        bv.setPosition x * @color_width + x * @color_padding , y * @color_height + y * @color_padding
+        @setViewPosition bv, x, y
         @$el.append bv.render().el
+
+        @bubbleViews[y][x] = bv
     @
-    
-  highlight_neighbour_fields: (x, y)->
-    neighbours = @model.get_neighbours x, y
+
+  setViewPosition: (view, x, y) ->
+    view.setPosition x * @color_width + x * @color_padding , y * @color_height + y * @color_padding
+
+  updatePositions: (bubbles) =>
+    bubbleViews = []
+    for y in [0..@model.get('width')-1]
+      bubbleViews.push []
+      for x in [0..@model.get('height')-1]
+        bubbleViews[y][x] = null
+
+    for y in [0..@model.get('width')-1]
+      for x in [0..@model.get('height')-1]
+        bubbleView = @bubbleViews[y][x]
+        if bubbleView? and not bubbleView.model.isDestroyed()
+          xPos = bubbleView.model.get 'xPos'
+          yPos = bubbleView.model.get 'yPos'
+          bubbleViews[yPos][xPos] = bubbleView
+          @setViewPosition bubbleView, xPos, yPos
+
+    @bubbleViews = bubbleViews

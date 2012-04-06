@@ -11789,6 +11789,7 @@ window.jQuery = window.$ = jQuery;
   "views/field_view": function(exports, require, module) {
     (function() {
   var Bubble, BubbleView,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -11801,6 +11802,8 @@ window.jQuery = window.$ = jQuery;
     __extends(FieldView, _super);
 
     function FieldView() {
+      this.updatePositions = __bind(this.updatePositions, this);
+      this.render = __bind(this.render, this);
       FieldView.__super__.constructor.apply(this, arguments);
     }
 
@@ -11810,28 +11813,57 @@ window.jQuery = window.$ = jQuery;
       */
       this.color_width = 20;
       this.color_height = 20;
-      return this.color_padding = 3;
+      this.color_padding = 3;
+      return this.model.bind('invalidate', this.updatePositions);
     };
 
     FieldView.prototype.render = function() {
-      var bv, colors, fields, x, y, _ref, _ref2;
+      var bubble, bubbles, bv, colors, x, y, _ref, _ref2;
+      console.log('render');
+      this.$el.html('');
+      this.bubbleViews = [];
       colors = this.model.get('colors');
-      fields = this.model.get('fields');
+      bubbles = this.model.get('bubbles');
       for (y = 0, _ref = this.model.get('width') - 1; 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
+        this.bubbleViews.push([]);
         for (x = 0, _ref2 = this.model.get('height') - 1; 0 <= _ref2 ? x <= _ref2 : x >= _ref2; 0 <= _ref2 ? x++ : x--) {
+          bubble = bubbles[y][x];
           bv = new BubbleView({
-            model: fields[y][x]
+            model: bubble
           }, this.color_width, this.color_height);
-          bv.setPosition(x * this.color_width + x * this.color_padding, y * this.color_height + y * this.color_padding);
+          this.setViewPosition(bv, x, y);
           this.$el.append(bv.render().el);
+          this.bubbleViews[y][x] = bv;
         }
       }
       return this;
     };
 
-    FieldView.prototype.highlight_neighbour_fields = function(x, y) {
-      var neighbours;
-      return neighbours = this.model.get_neighbours(x, y);
+    FieldView.prototype.setViewPosition = function(view, x, y) {
+      return view.setPosition(x * this.color_width + x * this.color_padding, y * this.color_height + y * this.color_padding);
+    };
+
+    FieldView.prototype.updatePositions = function(bubbles) {
+      var bubbleView, bubbleViews, x, xPos, y, yPos, _ref, _ref2, _ref3, _ref4;
+      bubbleViews = [];
+      for (y = 0, _ref = this.model.get('width') - 1; 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
+        bubbleViews.push([]);
+        for (x = 0, _ref2 = this.model.get('height') - 1; 0 <= _ref2 ? x <= _ref2 : x >= _ref2; 0 <= _ref2 ? x++ : x--) {
+          bubbleViews[y][x] = null;
+        }
+      }
+      for (y = 0, _ref3 = this.model.get('width') - 1; 0 <= _ref3 ? y <= _ref3 : y >= _ref3; 0 <= _ref3 ? y++ : y--) {
+        for (x = 0, _ref4 = this.model.get('height') - 1; 0 <= _ref4 ? x <= _ref4 : x >= _ref4; 0 <= _ref4 ? x++ : x--) {
+          bubbleView = this.bubbleViews[y][x];
+          if ((bubbleView != null) && !bubbleView.model.isDestroyed()) {
+            xPos = bubbleView.model.get('xPos');
+            yPos = bubbleView.model.get('yPos');
+            bubbleViews[yPos][xPos] = bubbleView;
+            this.setViewPosition(bubbleView, xPos, yPos);
+          }
+        }
+      }
+      return this.bubbleViews = bubbleViews;
     };
 
     return FieldView;
@@ -11855,14 +11887,17 @@ window.jQuery = window.$ = jQuery;
 
     function BubbleView() {
       this.toggleHighlight = __bind(this.toggleHighlight, this);
+      this.select = __bind(this.select, this);
       this.hover = __bind(this.hover, this);
+      this.destroy = __bind(this.destroy, this);
       BubbleView.__super__.constructor.apply(this, arguments);
     }
 
     BubbleView.prototype.className = 'bubble';
 
     BubbleView.prototype.events = {
-      'hover': 'hover'
+      'hover': 'hover',
+      'click': 'select'
     };
 
     BubbleView.prototype.render = function() {
@@ -11878,7 +11913,8 @@ window.jQuery = window.$ = jQuery;
       this.width = width;
       this.height = height;
       BubbleView.__super__.initialize.apply(this, arguments);
-      return this.model.bind('change:highlighted', this.toggleHighlight);
+      this.model.bind('change:highlighted', this.toggleHighlight);
+      return this.model.bind('change:destroyed', this.destroy);
     };
 
     BubbleView.prototype.setPosition = function(x, y) {
@@ -11889,15 +11925,19 @@ window.jQuery = window.$ = jQuery;
     };
 
     BubbleView.prototype.destroy = function() {
-      return this.$el.fadeOut();
+      var _this = this;
+      return this.$el.fadeOut('fast', function() {
+        return _this.$el.remove();
+      });
     };
 
     BubbleView.prototype.hover = function(event) {
       if (event.type !== 'mouseenter') return;
-      this.model.trigger('hovered', this.model);
-      return this.model.set({
-        highlighted: true
-      });
+      return this.model.trigger('hovered', this.model);
+    };
+
+    BubbleView.prototype.select = function() {
+      return this.model.trigger('selected', this.model);
     };
 
     BubbleView.prototype.toggleHighlight = function() {
@@ -11923,49 +11963,39 @@ window.jQuery = window.$ = jQuery;
   }
 }));
 (this.require.define({
-  "views/templates/home": function(exports, require, module) {
-    module.exports = function(__obj) {
-  var _safe = function(value) {
-    if (typeof value === 'undefined' && value == null)
-      value = '';
-    var result = new String(value);
-    result.ecoSafe = true;
-    return result;
-  };
-  return (function() {
-    var __out = [], __self = this, _print = function(value) {
-      if (typeof value !== 'undefined' && value != null)
-        __out.push(value.ecoSafe ? value : __self.escape(value));
-    }, _capture = function(callback) {
-      var out = __out, result;
-      __out = [];
-      callback.call(this);
-      result = __out.join('');
-      __out = out;
-      return _safe(result);
-    };
+  "initialize": function(exports, require, module) {
     (function() {
-    
-      _print(_safe('HELLO!'));
-    
-    }).call(this);
-    
-    return __out.join('');
-  }).call((function() {
-    var obj = {
-      escape: function(value) {
-        return ('' + value)
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;');
-      },
-      safe: _safe
-    }, key;
-    for (key in __obj) obj[key] = __obj[key];
-    return obj;
-  })());
-};
+  var BrunchApplication, HomeView, MainRouter,
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  BrunchApplication = require('helpers').BrunchApplication;
+
+  MainRouter = require('routers/main_router').MainRouter;
+
+  HomeView = require('views/home_view').HomeView;
+
+  exports.Application = (function(_super) {
+
+    __extends(Application, _super);
+
+    function Application() {
+      Application.__super__.constructor.apply(this, arguments);
+    }
+
+    Application.prototype.initialize = function() {
+      this.router = new MainRouter;
+      return this.homeView = new HomeView;
+    };
+
+    return Application;
+
+  })(BrunchApplication);
+
+  window.app = new exports.Application;
+
+}).call(this);
+
   }
 }));
 (this.require.define({
@@ -12041,7 +12071,8 @@ window.jQuery = window.$ = jQuery;
 
     Bubble.prototype.defaults = {
       highlighted: false,
-      selected: false
+      selected: false,
+      destroyed: false
     };
 
     Bubble.prototype.unhighlight = function() {
@@ -12054,6 +12085,10 @@ window.jQuery = window.$ = jQuery;
       return this.set({
         highlighted: true
       });
+    };
+
+    Bubble.prototype.isDestroyed = function() {
+      return this.get('destroyed');
     };
 
     return Bubble;
@@ -12079,6 +12114,7 @@ window.jQuery = window.$ = jQuery;
     __extends(Field, _super);
 
     function Field() {
+      this.removeBubbles = __bind(this.removeBubbles, this);
       this.highlightBubbles = __bind(this.highlightBubbles, this);
       Field.__super__.constructor.apply(this, arguments);
     }
@@ -12086,36 +12122,40 @@ window.jQuery = window.$ = jQuery;
     Field.prototype.defaults = {
       width: 15,
       height: 15,
-      colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00']
+      colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00'],
+      score: 0
     };
 
     Field.prototype.initialize = function() {
       return this.set({
-        'fields': this._generate_field()
+        'bubbles': this._generate_field()
       });
     };
 
     Field.prototype._generate_field = function() {
-      var color_length, colors, curr_color, fields, new_bubble, x, y, _ref, _ref2;
-      fields = [];
+      var bubbles, color_length, colors, curr_color, new_bubble, x, y, _ref, _ref2;
+      bubbles = [];
       color_length = this.get('colors').length;
       colors = this.get('colors');
       for (y = 0, _ref = this.get('height'); 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
-        fields.push([]);
+        bubbles.push([]);
         for (x = 0, _ref2 = this.get('width'); 0 <= _ref2 ? x <= _ref2 : x >= _ref2; 0 <= _ref2 ? x++ : x--) {
           curr_color = parseInt(Math.random() * color_length, 10);
           new_bubble = new Bubble({
-            color: colors[curr_color]
+            color: colors[curr_color],
+            xPos: x,
+            yPos: y
           });
-          fields[y][x] = new_bubble;
+          bubbles[y][x] = new_bubble;
           this._bindBubbleEvents(new_bubble);
         }
       }
-      return fields;
+      return bubbles;
     };
 
     Field.prototype._bindBubbleEvents = function(bubble) {
-      return bubble.bind('hovered', this.highlightBubbles);
+      bubble.bind('hovered', this.highlightBubbles);
+      return bubble.bind('selected', this.removeBubbles);
     };
 
     Field.prototype.highlightBubbles = function(bubble) {
@@ -12125,8 +12165,7 @@ window.jQuery = window.$ = jQuery;
         if (bubble !== currentBubble) return currentBubble.unhighlight();
       });
       neighbors = this.getNeighborsOf(bubble);
-      console.log("TODO: find a good way for showing the score");
-      $('#score').text("score: " + (neighbors.length * (neighbors.length - 1)));
+      $('#current_score').text("current score: " + (this.calculateScore(neighbors)));
       if (neighbors.length < 2) return;
       _results = [];
       for (_i = 0, _len = neighbors.length; _i < _len; _i++) {
@@ -12136,20 +12175,99 @@ window.jQuery = window.$ = jQuery;
       return _results;
     };
 
+    Field.prototype.removeBubbles = function(bubble) {
+      var neighbors;
+      neighbors = this.getNeighborsOf(bubble);
+      if (neighbors.length < 2) return;
+      this.setNewScore(neighbors);
+      this.clearBubbles(neighbors);
+      return this.trigger('invalidate', this.get('bubbles'));
+    };
+
+    Field.prototype.setNewScore = function(neighbors) {
+      var oldscore, score;
+      oldscore = this.get('score');
+      score = this.calculateScore(neighbors);
+      this.set({
+        score: oldscore + score
+      });
+      console.log("TODO: find a good way for showing the score");
+      return $('#score').text("total  score: " + (this.get('score')));
+    };
+
+    Field.prototype.clearBubbles = function(neighbors) {
+      var bubble, bubbles, height, pos, width, x, y, y2, y3, _i, _len, _results;
+      bubbles = this.get('bubbles');
+      for (_i = 0, _len = neighbors.length; _i < _len; _i++) {
+        bubble = neighbors[_i];
+        bubble.set({
+          'destroyed': true
+        });
+        pos = this.getArrayPosition(bubble);
+        bubbles[pos.y][pos.x] = null;
+      }
+      width = this.get('width');
+      height = this.get('height');
+      _results = [];
+      for (y = 0; 0 <= height ? y <= height : y >= height; 0 <= height ? y++ : y--) {
+        _results.push((function() {
+          var _results2;
+          _results2 = [];
+          for (x = 0; 0 <= width ? x <= width : x >= width; 0 <= width ? x++ : x--) {
+            bubble = bubbles[y][x];
+            y2 = y - 1;
+            if (!bubble && y2 >= 0) {
+              _results2.push((function() {
+                var _results3;
+                _results3 = [];
+                for (y3 = y2; y2 <= 0 ? y3 <= 0 : y3 >= 0; y2 <= 0 ? y3++ : y3--) {
+                  bubble = bubbles[y3][x];
+                  if (bubble != null) {
+                    bubbles[y3 + 1][x] = bubble;
+                    bubbles[y3][x] = null;
+                    _results3.push(bubble.set({
+                      xPos: x,
+                      yPos: y3 + 1
+                    }));
+                  } else {
+                    _results3.push(void 0);
+                  }
+                }
+                return _results3;
+              })());
+            } else {
+              _results2.push(void 0);
+            }
+          }
+          return _results2;
+        })());
+      }
+      return _results;
+    };
+
+    Field.prototype.calculateScore = function(bubbles) {
+      return bubbles.length * (bubbles.length - 1);
+    };
+
     /* Execute fn with each bubble
     */
 
     Field.prototype.forEachBubble = function(fn) {
-      var fields, x, y, _ref, _results;
+      var bubble, bubbles, x, y, _ref, _results;
       if (!fn) return;
-      fields = this.get('fields');
+      bubbles = this.get('bubbles');
       _results = [];
       for (y = 0, _ref = this.get('height'); 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
         _results.push((function() {
           var _ref2, _results2;
           _results2 = [];
           for (x = 0, _ref2 = this.get('width'); 0 <= _ref2 ? x <= _ref2 : x >= _ref2; 0 <= _ref2 ? x++ : x--) {
-            _results2.push(fn(fields[y][x], x, y));
+            bubble = bubbles[y][x];
+            if (bubble != null) {
+              _results2.push(fn(bubbles[y][x], x, y));
+            } else {
+              _results2.push(void 0);
+            }
           }
           return _results2;
         }).call(this));
@@ -12162,14 +12280,13 @@ window.jQuery = window.$ = jQuery;
 
     Field.prototype.getArrayPosition = function(bubble) {
       var pos;
-      pos = {
-        x: -1,
-        y: -1
-      };
+      pos = null;
       this.forEachBubble(function(curr, x, y) {
         if (curr === bubble) {
-          pos.x = x;
-          return pos.y = y;
+          return pos = {
+            x: x,
+            y: y
+          };
         }
       });
       return pos;
@@ -12179,11 +12296,11 @@ window.jQuery = window.$ = jQuery;
     */
 
     Field.prototype.getNeighborsOf = function(bubble) {
-      var checkcolor, checklist, curr, fields, height, pos, result, width;
+      var bubbles, checkcolor, checklist, curr, height, pos, result, width;
       checklist = [bubble];
       checkcolor = bubble.get('color');
       result = [];
-      fields = this.get('fields');
+      bubbles = this.get('bubbles');
       width = this.get('width');
       height = this.get('height');
       while (checklist.length > 0) {
@@ -12191,10 +12308,12 @@ window.jQuery = window.$ = jQuery;
         if ((curr != null) && curr.get('color') === checkcolor && !_(result).include(curr)) {
           result.push(curr);
           pos = this.getArrayPosition(curr);
-          if (pos.x + 1 < width) checklist.push(fields[pos.y][pos.x + 1]);
-          if (pos.y + 1 < height) checklist.push(fields[pos.y + 1][pos.x]);
-          if (pos.x - 1 >= 0) checklist.push(fields[pos.y][pos.x - 1]);
-          if (pos.y - 1 >= 0) checklist.push(fields[pos.y - 1][pos.x]);
+          if (pos != null) {
+            if (pos.x + 1 < width) checklist.push(bubbles[pos.y][pos.x + 1]);
+            if (pos.y + 1 < height) checklist.push(bubbles[pos.y + 1][pos.x]);
+            if (pos.x - 1 >= 0) checklist.push(bubbles[pos.y][pos.x - 1]);
+            if (pos.y - 1 >= 0) checklist.push(bubbles[pos.y - 1][pos.x]);
+          }
         }
       }
       return result;
@@ -12257,38 +12376,48 @@ window.jQuery = window.$ = jQuery;
   }
 }));
 (this.require.define({
-  "initialize": function(exports, require, module) {
-    (function() {
-  var BrunchApplication, HomeView, MainRouter,
-    __hasProp = Object.prototype.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-  BrunchApplication = require('helpers').BrunchApplication;
-
-  MainRouter = require('routers/main_router').MainRouter;
-
-  HomeView = require('views/home_view').HomeView;
-
-  exports.Application = (function(_super) {
-
-    __extends(Application, _super);
-
-    function Application() {
-      Application.__super__.constructor.apply(this, arguments);
-    }
-
-    Application.prototype.initialize = function() {
-      this.router = new MainRouter;
-      return this.homeView = new HomeView;
+  "views/templates/home": function(exports, require, module) {
+    module.exports = function(__obj) {
+  var _safe = function(value) {
+    if (typeof value === 'undefined' && value == null)
+      value = '';
+    var result = new String(value);
+    result.ecoSafe = true;
+    return result;
+  };
+  return (function() {
+    var __out = [], __self = this, _print = function(value) {
+      if (typeof value !== 'undefined' && value != null)
+        __out.push(value.ecoSafe ? value : __self.escape(value));
+    }, _capture = function(callback) {
+      var out = __out, result;
+      __out = [];
+      callback.call(this);
+      result = __out.join('');
+      __out = out;
+      return _safe(result);
     };
-
-    return Application;
-
-  })(BrunchApplication);
-
-  window.app = new exports.Application;
-
-}).call(this);
-
+    (function() {
+    
+      _print(_safe('HELLO!'));
+    
+    }).call(this);
+    
+    return __out.join('');
+  }).call((function() {
+    var obj = {
+      escape: function(value) {
+        return ('' + value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      },
+      safe: _safe
+    }, key;
+    for (key in __obj) obj[key] = __obj[key];
+    return obj;
+  })());
+};
   }
 }));
