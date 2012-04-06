@@ -2,8 +2,8 @@
 
 class exports.Field extends Backbone.Model
   defaults :
-    width : 5
-    height : 5
+    width : 15
+    height : 15
     colors : ['#ff0000', '#00ff00', '#0000ff', '#ffff00']
   
   initialize : ->
