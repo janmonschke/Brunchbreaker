@@ -215,8 +215,7 @@ body{background:#91a2c0;font:bold 18px "Helvetica Neue",Arial,Helvetica,sans-ser
 ul{list-style-type:none}
 a,a:visited{color:#f95a5a;text-decoration:none}
 a:hover{color:#665248}
-#home-view{width:600px;height:200px;margin:20px auto;}
-#home-view #content{background:#fff;padding:20px;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px}
+#content{background:#fff;padding:20px;position:relative;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px}
 body{font-size:15px;color:#666;background:#fff;font-family:"KievitPro","ff-kievit-web-pro-1","ff-kievit-web-pro-2","Helvetica Neue",Arial,Helvetica,sans-serif}
 h1,h2,h3,h3,h4{font-weight:normal;color:#222;clear:left}
 h1{font-size:5em;line-height:1.4;margin-bottom:.5em}

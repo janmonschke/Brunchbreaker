@@ -3,7 +3,6 @@ class exports.BubbleView extends Backbone.View
   
   events : 
     'hover'  : 'hover'
-    'touchstart' : 'hover'
 
   render : ->
     @$el.css 
@@ -25,7 +24,8 @@ class exports.BubbleView extends Backbone.View
   destroy : ->
     @$el.fadeOut()
     
-  hover : =>
+  hover : (event) =>
+    return unless event.type is 'mouseenter'
     @model.trigger 'hovered', @model
     @model.set highlighted: true
     

@@ -23,9 +23,9 @@ class exports.Field extends Backbone.Model
     return fields
   
   _bindBubbleEvents: (bubble) ->
-    bubble.bind 'hovered', @calculateHighlights
+    bubble.bind 'hovered', @highlightBubbles
 
-  calculateHighlights: (bubble) =>
+  highlightBubbles: (bubble) =>
     # remove the highlight state from all but the current bubble
     @forEachBubble (currentBubble) =>
       if bubble != currentBubble
@@ -33,6 +33,11 @@ class exports.Field extends Backbone.Model
 
     # find all neighbors
     neighbors = @getNeighborsOf bubble
+
+    console.log "TODO: find a good way for showing the score"
+    $('#score').text "score: #{neighbors.length * (neighbors.length-1)}"
+
+    return if neighbors.length < 2
 
     for neighbor in neighbors
       neighbor.highlight()

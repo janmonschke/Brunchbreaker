@@ -11862,8 +11862,7 @@ window.jQuery = window.$ = jQuery;
     BubbleView.prototype.className = 'bubble';
 
     BubbleView.prototype.events = {
-      'hover': 'hover',
-      'touchstart': 'hover'
+      'hover': 'hover'
     };
 
     BubbleView.prototype.render = function() {
@@ -11893,7 +11892,8 @@ window.jQuery = window.$ = jQuery;
       return this.$el.fadeOut();
     };
 
-    BubbleView.prototype.hover = function() {
+    BubbleView.prototype.hover = function(event) {
+      if (event.type !== 'mouseenter') return;
       this.model.trigger('hovered', this.model);
       return this.model.set({
         highlighted: true
@@ -12079,7 +12079,7 @@ window.jQuery = window.$ = jQuery;
     __extends(Field, _super);
 
     function Field() {
-      this.calculateHighlights = __bind(this.calculateHighlights, this);
+      this.highlightBubbles = __bind(this.highlightBubbles, this);
       Field.__super__.constructor.apply(this, arguments);
     }
 
@@ -12115,16 +12115,19 @@ window.jQuery = window.$ = jQuery;
     };
 
     Field.prototype._bindBubbleEvents = function(bubble) {
-      return bubble.bind('hovered', this.calculateHighlights);
+      return bubble.bind('hovered', this.highlightBubbles);
     };
 
-    Field.prototype.calculateHighlights = function(bubble) {
+    Field.prototype.highlightBubbles = function(bubble) {
       var neighbor, neighbors, _i, _len, _results,
         _this = this;
       this.forEachBubble(function(currentBubble) {
         if (bubble !== currentBubble) return currentBubble.unhighlight();
       });
       neighbors = this.getNeighborsOf(bubble);
+      console.log("TODO: find a good way for showing the score");
+      $('#score').text("score: " + (neighbors.length * (neighbors.length - 1)));
+      if (neighbors.length < 2) return;
       _results = [];
       for (_i = 0, _len = neighbors.length; _i < _len; _i++) {
         neighbor = neighbors[_i];
