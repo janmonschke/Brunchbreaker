@@ -42,6 +42,8 @@ class exports.FieldView extends Backbone.View
       for x in [0..@model.get('height')-1]
         bubbleViews[y][x] = null
 
+    # update all view positions according to the positions in the model
+    # why is this done here? could also be moved to the bubble view itself...
     for y in [0..@model.get('width')-1]
       for x in [0..@model.get('height')-1]
         bubbleView = @bubbleViews[y][x]
