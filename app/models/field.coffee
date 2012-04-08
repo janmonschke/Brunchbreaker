@@ -5,7 +5,8 @@
 # 
 # List of events:
 # - currentScore [the score the user would currently get if he clicked]
-# - scored [the user has scored]
+# - scored [the user has scored this amount of points]
+# - noMoreMoves [games over with x remaining bubbles]
 class exports.Field extends Backbone.Model
   defaults :
     width : 15
@@ -117,7 +118,7 @@ class exports.Field extends Backbone.Model
   checkForPossibleMoves: ->
     movesLeft = false
     bubbles = @get 'bubbles'
-
+    runs = 0
     @forEachBubble (bubble, x, y) =>
       # check all 4 neighbors if they have the same colors
       color = bubble.get 'color'
@@ -129,10 +130,17 @@ class exports.Field extends Backbone.Model
             if currBubble?
               if currBubble.get('color') == color
                 movesLeft = true
+                console.log 1
                 break # breaks the current loop since only one matching neighbor is needed
-                return false # this will stop the forEachBubble execution
 
-    $.publish 'noMoreMoves' unless movesLeft
+      return false if movesLeft # this will stop the forEachBubble execution
+
+    unless movesLeft
+      remaining = 0
+      for arr in bubbles
+          for bubble in arr
+            remaining++ if bubble?
+      $.publish 'noMoreMoves', [remaining]
 
   # Execute fn with each bubble
   #

@@ -11888,8 +11888,8 @@ window.jQuery = window.$ = jQuery;
         model: this.game.field
       });
       $.subscribe('currentScore', this.displayCurrentScore);
-      $.subscribe('noMoreMoves', function() {
-        return alert('Game Over');
+      $.subscribe('noMoreMoves', function(remainingCount) {
+        return alert("Game Over with " + remainingCount + " remaining bubbles");
       });
       return this.game.bind('change:score', this.updateScoreView);
     };
@@ -12389,10 +12389,11 @@ window.jQuery = window.$ = jQuery;
     };
 
     Field.prototype.checkForPossibleMoves = function() {
-      var bubbles, movesLeft,
+      var arr, bubble, bubbles, movesLeft, remaining, runs, _i, _j, _len, _len2,
         _this = this;
       movesLeft = false;
       bubbles = this.get('bubbles');
+      runs = 0;
       this.forEachBubble(function(bubble, x, y) {
         var color, currBubble, x2, y2, _ref;
         color = bubble.get('color');
@@ -12404,15 +12405,26 @@ window.jQuery = window.$ = jQuery;
               if (currBubble != null) {
                 if (currBubble.get('color') === color) {
                   movesLeft = true;
+                  console.log(1);
                   break;
-                  return false;
                 }
               }
             }
           }
         }
+        if (movesLeft) return false;
       });
-      if (!movesLeft) return $.publish('noMoreMoves');
+      if (!movesLeft) {
+        remaining = 0;
+        for (_i = 0, _len = bubbles.length; _i < _len; _i++) {
+          arr = bubbles[_i];
+          for (_j = 0, _len2 = arr.length; _j < _len2; _j++) {
+            bubble = arr[_j];
+            if (bubble != null) remaining++;
+          }
+        }
+        return $.publish('noMoreMoves', [remaining]);
+      }
     };
 
     Field.prototype.forEachBubble = function(fn) {
