@@ -11785,7 +11785,219 @@ window.jQuery = window.$ = jQuery;
     throw new Error('A "url" property or function must be specified');
   };
 
-}).call(this);(this.require.define({
+}).call(this);/*  
+
+  jQuery pub/sub plugin by Peter Higgins (dante@dojotoolkit.org)
+
+  Loosely based on Dojo publish/subscribe API, limited in scope. Rewritten blindly.
+
+  Original is (c) Dojo Foundation 2004-2010. Released under either AFL or new BSD, see:
+  http://dojofoundation.org/license for more information.
+
+*/  
+
+;(function(d){
+
+  // the topic/subscription hash
+  var cache = {};
+
+  d.publish = function(/* String */topic, /* Array? */args){
+    // summary: 
+    //    Publish some data on a named topic.
+    // topic: String
+    //    The channel to publish on
+    // args: Array?
+    //    The data to publish. Each array item is converted into an ordered
+    //    arguments on the subscribed functions. 
+    //
+    // example:
+    //    Publish stuff on '/some/topic'. Anything subscribed will be called
+    //    with a function signature like: function(a,b,c){ ... }
+    //
+    //  |   $.publish("/some/topic", ["a","b","c"]);
+    cache[topic] && d.each(cache[topic], function(){
+      this.apply(d, args || []);
+    });
+  };
+
+  d.subscribe = function(/* String */topic, /* Function */callback){
+    // summary:
+    //    Register a callback on a named topic.
+    // topic: String
+    //    The channel to subscribe to
+    // callback: Function
+    //    The handler event. Anytime something is $.publish'ed on a 
+    //    subscribed channel, the callback will be called with the
+    //    published array as ordered arguments.
+    //
+    // returns: Array
+    //    A handle which can be used to unsubscribe this particular subscription.
+    //  
+    // example:
+    //  | $.subscribe("/some/topic", function(a, b, c){ /* handle data */ });
+    //
+    if(!cache[topic]){
+      cache[topic] = [];
+    }
+    cache[topic].push(callback);
+    return [topic, callback]; // Array
+  };
+
+  d.unsubscribe = function(/* Array */handle){
+    // summary:
+    //    Disconnect a subscribed function for a topic.
+    // handle: Array
+    //    The return value from a $.subscribe call.
+    // example:
+    //  | var handle = $.subscribe("/something", function(){});
+    //  | $.unsubscribe(handle);
+    
+    var t = handle[0];
+    cache[t] && d.each(cache[t], function(idx){
+      if(this == handle[1]){
+        cache[t].splice(idx, 1);
+      }
+    });
+  };
+
+})(jQuery);
+(this.require.define({
+  "views/game_view": function(exports, require, module) {
+    (function() {
+  var Field, FieldView,
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  Field = require('models/field').Field;
+
+  FieldView = require('views/field_view').FieldView;
+
+  exports.GameView = (function(_super) {
+
+    __extends(GameView, _super);
+
+    function GameView() {
+      GameView.__super__.constructor.apply(this, arguments);
+    }
+
+    GameView.prototype.initialize = function() {
+      this.field = new Field();
+      this.fieldView = new FieldView({
+        model: this.field
+      });
+      $.subscribe('currentScore', this.displayCurrentScore);
+      return $.subscribe('newTotalScore', this.updateScoreView);
+    };
+
+    GameView.prototype.render = function() {
+      this.$el.html(this.fieldView.render().el);
+      return this;
+    };
+
+    GameView.prototype.displayCurrentScore = function(score) {
+      return $('#current_score').text("current score: " + score);
+    };
+
+    GameView.prototype.updateScoreView = function(newTotalScore) {
+      return $('#score').text("total  score: " + newTotalScore);
+    };
+
+    return GameView;
+
+  })(Backbone.View);
+
+}).call(this);
+
+  }
+}));
+(this.require.define({
+  "views/bubble_view": function(exports, require, module) {
+    (function() {
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  exports.BubbleView = (function(_super) {
+
+    __extends(BubbleView, _super);
+
+    function BubbleView() {
+      this.toggleHighlight = __bind(this.toggleHighlight, this);
+      this.select = __bind(this.select, this);
+      this.hover = __bind(this.hover, this);
+      this.destroy = __bind(this.destroy, this);
+      BubbleView.__super__.constructor.apply(this, arguments);
+    }
+
+    BubbleView.prototype.className = 'bubble';
+
+    BubbleView.prototype.events = {
+      'hover': 'hover',
+      'click': 'select'
+    };
+
+    BubbleView.prototype.render = function() {
+      this.$el.css({
+        'background-color': this.model.get('color'),
+        'width': this.width,
+        'height': this.height
+      });
+      return this;
+    };
+
+    BubbleView.prototype.initialize = function(model, width, height) {
+      this.width = width;
+      this.height = height;
+      BubbleView.__super__.initialize.apply(this, arguments);
+      this.model.bind('change:highlighted', this.toggleHighlight);
+      return this.model.bind('change:destroyed', this.destroy);
+    };
+
+    BubbleView.prototype.setPosition = function(x, y) {
+      return this.$el.css({
+        'left': "" + x + "px",
+        'top': "" + y + "px"
+      });
+    };
+
+    BubbleView.prototype.destroy = function() {
+      var _this = this;
+      return this.$el.fadeOut('fast', function() {
+        return _this.$el.remove();
+      });
+    };
+
+    BubbleView.prototype.hover = function(event) {
+      return this.model.trigger('hovered', this.model);
+    };
+
+    BubbleView.prototype.select = function() {
+      return this.model.trigger('selected', this.model);
+    };
+
+    BubbleView.prototype.toggleHighlight = function() {
+      var highlighted;
+      highlighted = this.model.get('highlighted');
+      if (highlighted) {
+        return this.$el.css({
+          'background-color': '#000'
+        });
+      } else {
+        return this.$el.css({
+          'background-color': this.model.get('color')
+        });
+      }
+    };
+
+    return BubbleView;
+
+  })(Backbone.View);
+
+}).call(this);
+
+  }
+}));
+(this.require.define({
   "views/field_view": function(exports, require, module) {
     (function() {
   var Bubble, BubbleView,
@@ -11867,94 +12079,6 @@ window.jQuery = window.$ = jQuery;
     };
 
     return FieldView;
-
-  })(Backbone.View);
-
-}).call(this);
-
-  }
-}));
-(this.require.define({
-  "views/bubble_view": function(exports, require, module) {
-    (function() {
-  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __hasProp = Object.prototype.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-  exports.BubbleView = (function(_super) {
-
-    __extends(BubbleView, _super);
-
-    function BubbleView() {
-      this.toggleHighlight = __bind(this.toggleHighlight, this);
-      this.select = __bind(this.select, this);
-      this.hover = __bind(this.hover, this);
-      this.destroy = __bind(this.destroy, this);
-      BubbleView.__super__.constructor.apply(this, arguments);
-    }
-
-    BubbleView.prototype.className = 'bubble';
-
-    BubbleView.prototype.events = {
-      'hover': 'hover',
-      'click': 'select'
-    };
-
-    BubbleView.prototype.render = function() {
-      this.$el.css({
-        'background-color': this.model.get('color'),
-        'width': this.width,
-        'height': this.height
-      });
-      return this;
-    };
-
-    BubbleView.prototype.initialize = function(model, width, height) {
-      this.width = width;
-      this.height = height;
-      BubbleView.__super__.initialize.apply(this, arguments);
-      this.model.bind('change:highlighted', this.toggleHighlight);
-      return this.model.bind('change:destroyed', this.destroy);
-    };
-
-    BubbleView.prototype.setPosition = function(x, y) {
-      return this.$el.css({
-        'left': "" + x + "px",
-        'top': "" + y + "px"
-      });
-    };
-
-    BubbleView.prototype.destroy = function() {
-      var _this = this;
-      return this.$el.fadeOut('fast', function() {
-        return _this.$el.remove();
-      });
-    };
-
-    BubbleView.prototype.hover = function(event) {
-      if (event.type !== 'mouseenter') return;
-      return this.model.trigger('hovered', this.model);
-    };
-
-    BubbleView.prototype.select = function() {
-      return this.model.trigger('selected', this.model);
-    };
-
-    BubbleView.prototype.toggleHighlight = function() {
-      var highlighted;
-      highlighted = this.model.get('highlighted');
-      if (highlighted) {
-        return this.$el.css({
-          'background-color': '#000'
-        });
-      } else {
-        return this.$el.css({
-          'background-color': this.model.get('color')
-        });
-      }
-    };
-
-    return BubbleView;
 
   })(Backbone.View);
 
@@ -12071,7 +12195,6 @@ window.jQuery = window.$ = jQuery;
 
     Bubble.prototype.defaults = {
       highlighted: false,
-      selected: false,
       destroyed: false
     };
 
@@ -12165,7 +12288,7 @@ window.jQuery = window.$ = jQuery;
         if (bubble !== currentBubble) return currentBubble.unhighlight();
       });
       neighbors = this.getNeighborsOf(bubble);
-      $('#current_score').text("current score: " + (this.calculateScore(neighbors)));
+      $.publish('currentScore', [this.calculateScore(neighbors)]);
       if (neighbors.length < 2) return;
       _results = [];
       for (_i = 0, _len = neighbors.length; _i < _len; _i++) {
@@ -12191,8 +12314,7 @@ window.jQuery = window.$ = jQuery;
       this.set({
         score: oldscore + score
       });
-      console.log("TODO: find a good way for showing the score");
-      return $('#score').text("total  score: " + (this.get('score')));
+      return $.publish('newTotalScore', [this.get('score')]);
     };
 
     Field.prototype.clearBubbles = function(neighbors) {
@@ -12328,15 +12450,44 @@ window.jQuery = window.$ = jQuery;
   }
 }));
 (this.require.define({
-  "routers/main_router": function(exports, require, module) {
+  "models/game": function(exports, require, module) {
     (function() {
-  var Field, FieldView, HomeView,
+  var Field,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   Field = require('models/field').Field;
 
-  FieldView = require('views/field_view').FieldView;
+  exports.Game = (function(_super) {
+
+    __extends(Game, _super);
+
+    function Game() {
+      Game.__super__.constructor.apply(this, arguments);
+    }
+
+    Game.prototype.initialize = function() {
+      return this.field = new Field();
+    };
+
+    return Game;
+
+  })(Backbone.Model);
+
+}).call(this);
+
+  }
+}));
+(this.require.define({
+  "routers/main_router": function(exports, require, module) {
+    (function() {
+  var Game, GameView, HomeView,
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  Game = require('models/game').Game;
+
+  GameView = require('views/game_view').GameView;
 
   HomeView = require('views/home_view').HomeView;
 
@@ -12359,12 +12510,12 @@ window.jQuery = window.$ = jQuery;
     };
 
     MainRouter.prototype.new_game = function() {
-      var field, fv;
-      field = new Field();
-      fv = new FieldView({
-        model: field
+      var game, gv;
+      game = new Game();
+      gv = new GameView({
+        model: game
       });
-      return $('#content').html(fv.render().el);
+      return $('#content').html(gv.render().el);
     };
 
     return MainRouter;

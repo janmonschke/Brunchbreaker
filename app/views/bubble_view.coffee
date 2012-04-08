@@ -27,7 +27,6 @@ class exports.BubbleView extends Backbone.View
       @$el.remove()
     
   hover: (event) =>
-    return unless event.type is 'mouseenter'
     @model.trigger 'hovered', @model
     
   select: =>
