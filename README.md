@@ -16,8 +16,8 @@
 
 ## Achievements
 
-  Important: Ask to post achievements to Facebook timeline when first achievement has been made and save it as
-  a user preference.
+    Important: Ask to post achievements to Facebook timeline when first achievement has been made and save it as
+    a user preference.
 
 - Vertical Tetris Master - delete 50 columns (killColumnEvent needed)
 - Rookie - finish 5 games
