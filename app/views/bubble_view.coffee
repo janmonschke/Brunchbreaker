@@ -5,17 +5,17 @@ class exports.BubbleView extends Backbone.View
     'hover'  : 'hover'
     'click'  : 'select'
 
+  initialize: (model, @width, @height) -> 
+    super
+    @model.bind 'change:highlighted', @toggleHighlight
+    @model.bind 'change:destroyed', @destroy
+
   render: ->
     @$el.css 
       'background-color' : @model.get 'color'
       'width'            : @width
       'height'           : @height
     @
-    
-  initialize: (model, @width, @height) -> 
-    super
-    @model.bind 'change:highlighted', @toggleHighlight
-    @model.bind 'change:destroyed', @destroy
 
   setPosition: (x, y) ->
     @$el.css
