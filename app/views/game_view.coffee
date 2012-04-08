@@ -8,7 +8,8 @@ class exports.GameView extends Backbone.View
     @fieldView = new FieldView model: @game.field
 
     $.subscribe 'currentScore', @displayCurrentScore
-    $.subscribe 'newTotalScore', @updateScoreView
+    
+    @game.bind 'change:score', @updateScoreView
 
   render: ->
     @$el.html @fieldView.render().el
@@ -17,5 +18,5 @@ class exports.GameView extends Backbone.View
   displayCurrentScore: (score) ->
     $('#current_score').text "current score: #{score}"
 
-  updateScoreView: (newTotalScore) ->
-    $('#score').text "total  score: #{newTotalScore}"
+  updateScoreView: =>
+    $('#score').text "total  score: #{@game.get 'score'}"

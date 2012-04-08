@@ -1,11 +1,16 @@
 {Bubble} = require 'models/bubble'
 
+# The Field contains all algorithmic logic for the game
+# and emit events for important happenings.
+# 
+# List of events:
+# - currentScore [the score the user would currently get if he clicked]
+# - scored [the user has scored]
 class exports.Field extends Backbone.Model
   defaults :
     width : 15
     height : 15
     colors : ['#ff0000', '#00ff00', '#0000ff', '#ffff00']
-    score: 0
   
   initialize : ->
     @set 'bubbles' : @_generate_field()
@@ -46,20 +51,14 @@ class exports.Field extends Backbone.Model
   removeBubbles: (bubble) =>
     neighbors = @getNeighborsOf bubble
     return if neighbors.length < 2
-
-    # set the new score for this field
-    @setNewScore neighbors
     
+    # emit event with the points just scored
+    $.publish 'scored', [@calculateScore neighbors]
+
     # remove the bubbles from the field
     @clearBubbles neighbors
 
     @trigger 'invalidate', @get 'bubbles'
-
-  setNewScore: (neighbors) ->
-    oldscore = @get 'score'
-    score = @calculateScore neighbors
-    @set score: oldscore + score
-    $.publish 'newTotalScore', [@get 'score']
 
   clearBubbles: (neighbors) ->
     bubbles = @get 'bubbles'
