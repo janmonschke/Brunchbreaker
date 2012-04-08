@@ -12428,11 +12428,13 @@ window.jQuery = window.$ = jQuery;
     };
 
     Field.prototype.forEachBubble = function(fn) {
-      var bubble, bubbles, ret, x, y, _ref, _results;
+      var bubble, bubbles, ret, stopped, x, y, _ref, _results;
       if (!fn) return;
       bubbles = this.get('bubbles');
+      stopped = false;
       _results = [];
       for (y = 0, _ref = this.get('height') - 1; 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
+        if (stopped) break;
         _results.push((function() {
           var _ref2, _results2;
           _results2 = [];
@@ -12441,6 +12443,7 @@ window.jQuery = window.$ = jQuery;
             if (bubble != null) {
               ret = fn(bubbles[y][x], x, y);
               if (ret === false) {
+                stopped = true;
                 break;
               } else {
                 _results2.push(void 0);
@@ -12460,10 +12463,11 @@ window.jQuery = window.$ = jQuery;
       pos = null;
       this.forEachBubble(function(curr, x, y) {
         if (curr === bubble) {
-          return pos = {
+          pos = {
             x: x,
             y: y
           };
+          return false;
         }
       });
       return pos;

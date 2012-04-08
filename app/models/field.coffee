@@ -150,12 +150,16 @@ class exports.Field extends Backbone.Model
   forEachBubble: (fn) ->
     return unless fn
     bubbles = @get 'bubbles'
+    stopped = false
     for y in [0..@get('height')-1]
+      break if stopped
       for x in [0..@get('width')-1]
         bubble = bubbles[y][x]
         if bubble?
           ret = fn bubbles[y][x], x, y
-          break if ret == false
+          if ret == false
+            stopped = true
+            break 
 
   # Returns the array position of the current bubble
   # @param [exports.Bubble] bubble the bubble
@@ -164,6 +168,7 @@ class exports.Field extends Backbone.Model
     @forEachBubble (curr, x, y) ->
       if curr is bubble
         pos = x: x, y: y
+        return false
     pos
 
   ### Also includes the current bubble ###
