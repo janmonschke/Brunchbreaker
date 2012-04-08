@@ -90,7 +90,6 @@ class exports.Field extends Backbone.Model
     for x in [0..width-1]
       bubbleCount = 0
       for y in [0..height-1]
-        console.log x, y, bubbles[y][x]
         if bubbles[y][x]?
           bubbleCount++
 
