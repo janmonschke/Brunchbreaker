@@ -102,7 +102,7 @@
       </table>
       <h2>Overview</h2>
       <div class='docstring'>
-  <p>The Field contains all algorithmic logic for the game and emit events for important happenings. </p> <p>List of events: - currentScore [the score the user would currently get if he clicked] - newTotalScore [the total score has increased] </p> 
+  <p>The Field contains all algorithmic logic for the game and emit events for important happenings. </p> <p>List of events: - currentScore [the score the user would currently get if he clicked] - scored [the user has scored] </p> 
 </div>
 <div class='tags'>
 </div>
@@ -162,16 +162,6 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#setNewScore-instance'>
-        - (void) <strong>setNewScore</strong>(neighbors)
-      </a>
-    </span>
-    <span class='desc'>
-      
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
       <a href='#clearBubbles-instance'>
         - (void) <strong>clearBubbles</strong>(neighbors)
       </a>
@@ -188,6 +178,36 @@
     </span>
     <span class='desc'>
       
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#checkForPossibleMoves-instance'>
+        - (void) <strong>checkForPossibleMoves</strong>()
+      </a>
+    </span>
+    <span class='desc'>
+      
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#forEachBubble-instance'>
+        - (void) <strong>forEachBubble</strong>(fn)
+      </a>
+    </span>
+    <span class='desc'>
+      Execute fn with each bubble Exection will stop if fn returns false
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#getArrayPosition-instance'>
+        - (void) <strong>getArrayPosition</strong>(bubble)
+      </a>
+    </span>
+    <span class='desc'>
+      Returns the array position of the current bubble
     </span>
   </li>
 </ul>
@@ -231,13 +251,6 @@
 </div>
   </div>
   <div class='method_details'>
-    <p class='signature' id='setNewScore-instance'>
-      - (void) <strong>setNewScore</strong>(neighbors)
-    </p>
-    <div class='tags'>
-</div>
-  </div>
-  <div class='method_details'>
     <p class='signature' id='clearBubbles-instance'>
       - (void) <strong>clearBubbles</strong>(neighbors)
     </p>
@@ -251,11 +264,60 @@
     <div class='tags'>
 </div>
   </div>
+  <div class='method_details'>
+    <p class='signature' id='checkForPossibleMoves-instance'>
+      - (void) <strong>checkForPossibleMoves</strong>()
+    </p>
+    <div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='forEachBubble-instance'>
+      - (void) <strong>forEachBubble</strong>(fn)
+    </p>
+    <div class='docstring'>
+  <p>Execute fn with each bubble </p> <p>Exection will stop if fn returns false </p> 
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>fn</span>
+      <span class='type'>
+        (<tt>Function</tt>)
+      </span>
+      &mdash;
+      <span class='desc'>the function to be executed</span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='getArrayPosition-instance'>
+      - (void) <strong>getArrayPosition</strong>(bubble)
+    </p>
+    <div class='docstring'>
+  <p>Returns the array position of the current bubble </p> 
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>bubble</span>
+      <span class='type'>
+        (<tt><a href='../../classes/exports/Bubble.html'>exports.Bubble</a></tt>)
+      </span>
+      &mdash;
+      <span class='desc'>the bubble</span>
+    </li>
+  </ul>
+</div>
+  </div>
 </div>
     </div>
     <div id='footer'>
   Generated on
-  Sun Apr 08 2012 15:08:19 GMT+0200 (CEST)
+  Sun Apr 08 2012 17:42:21 GMT+0200 (CEST)
   by
   <a href='https://github.com/netzpirat/codo' title='CoffeeScript API documentation generator'>Codo</a>
   v0.6.2
