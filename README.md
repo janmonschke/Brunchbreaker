@@ -1,9 +1,26 @@
 # Brunchbreaker
 
+## TODO:
+
+- User-Model
+  - achievements
+  - user preferences
+    - post achievements to FB?
+  - name
+  - fbid
+  - colors
+
+- Views
+  - User preferences (colors, screenname, post to FB?)
+  - Menu (New Game, Highscore, Achievements, Preferences, Howto)
+
 ## Achievements
 
+  Important: Ask to post achievements to Facebook timeline when first achievement has been made and save it as
+  a user preference.
+
 - Vertical Tetris Master - delete 50 columns (killColumnEvent needed)
-- Rookie - finish 1st game
+- Rookie - finish 5 games
 - Freshman - finish 10 games
 - Pro - finish 100 games
 - Bubble Master - finish 10 games with no bubbles left
