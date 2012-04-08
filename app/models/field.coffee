@@ -8,8 +8,8 @@
 # - scored [the user has scored]
 class exports.Field extends Backbone.Model
   defaults :
-    width : 15
-    height : 15
+    width : 5
+    height : 5
     colors : ['#ff0000', '#00ff00', '#0000ff', '#ffff00']
   
   initialize : ->
@@ -19,9 +19,9 @@ class exports.Field extends Backbone.Model
     bubbles = []
     color_length = @get('colors').length
     colors = @get 'colors'
-    for y in [0..@get 'height']
+    for y in [0..@get('height')-1]
       bubbles.push []
-      for x in [0..@get 'width']
+      for x in [0..@get('width')-1]
         curr_color = parseInt(Math.random() * color_length, 10)
         new_bubble = new Bubble color: colors[curr_color], xPos: x, yPos: y
         bubbles[y][x] = new_bubble 
@@ -58,7 +58,11 @@ class exports.Field extends Backbone.Model
     # remove the bubbles from the field
     @clearBubbles neighbors
 
+    # field needs to get redrawn
     @trigger 'invalidate', @get 'bubbles'
+
+    # check if still some possible moves left
+    @checkForPossibleMoves()
 
   clearBubbles: (neighbors) ->
     bubbles = @get 'bubbles'
@@ -98,7 +102,7 @@ class exports.Field extends Backbone.Model
       x2 = x-1
       if bubbleCount == 0 and x2 >= 0
         for x3 in [x2..0]
-          for y2 in [0..height]
+          for y2 in [0..height-1]
             bubble = bubbles[y2][x3]
             bubbles[y2][x3+1] = bubble
             bubbles[y2][x3] = null
@@ -110,16 +114,43 @@ class exports.Field extends Backbone.Model
   calculateScore: (bubbles) ->
     bubbles.length * (bubbles.length - 1)
 
-  ### Execute fn with each bubble ###
+  checkForPossibleMoves: ->
+    movesLeft = false
+    bubbles = @get 'bubbles'
+
+    @forEachBubble (bubble, x, y) =>
+      # check all 4 neighbors if they have the same colors
+      color = bubble.get 'color'
+      for y2 in [-1...1]
+        break if movesLeft
+        for x2 in [-1...1]
+          unless x2 == y2 or -x2 == y2 # only check right, underneath, left and above
+            currBubble = bubbles[y2+y]?[x2+x]
+            if currBubble?
+              if currBubble.get('color') == color
+                movesLeft = true
+                break # breaks the current loop since only one matching neighbor is needed
+                return false # this will stop the forEachBubble execution
+
+    $.publish 'noMoreMoves' unless movesLeft
+
+  # Execute fn with each bubble
+  #
+  # Exection will stop if fn returns false
+  #
+  # @param [Function] fn the function to be executed
   forEachBubble: (fn) ->
     return unless fn
     bubbles = @get 'bubbles'
-    for y in [0..@get 'height']
-      for x in [0..@get 'width']
+    for y in [0..@get('height')-1]
+      for x in [0..@get('width')-1]
         bubble = bubbles[y][x]
-        fn bubbles[y][x], x, y if bubble?
+        if bubble?
+          ret = fn bubbles[y][x], x, y
+          break if ret == false
 
-  ### Returns the array position of the current bubble ###
+  # Returns the array position of the current bubble
+  # @param [exports.Bubble] bubble the bubble
   getArrayPosition: (bubble) ->
     pos = null
     @forEachBubble (curr, x, y) ->

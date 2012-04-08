@@ -11888,6 +11888,9 @@ window.jQuery = window.$ = jQuery;
         model: this.game.field
       });
       $.subscribe('currentScore', this.displayCurrentScore);
+      $.subscribe('noMoreMoves', function() {
+        return alert('Game Over');
+      });
       return this.game.bind('change:score', this.updateScoreView);
     };
 
@@ -12245,8 +12248,8 @@ window.jQuery = window.$ = jQuery;
     }
 
     Field.prototype.defaults = {
-      width: 15,
-      height: 15,
+      width: 5,
+      height: 5,
       colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00']
     };
 
@@ -12261,9 +12264,9 @@ window.jQuery = window.$ = jQuery;
       bubbles = [];
       color_length = this.get('colors').length;
       colors = this.get('colors');
-      for (y = 0, _ref = this.get('height'); 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
+      for (y = 0, _ref = this.get('height') - 1; 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
         bubbles.push([]);
-        for (x = 0, _ref2 = this.get('width'); 0 <= _ref2 ? x <= _ref2 : x >= _ref2; 0 <= _ref2 ? x++ : x--) {
+        for (x = 0, _ref2 = this.get('width') - 1; 0 <= _ref2 ? x <= _ref2 : x >= _ref2; 0 <= _ref2 ? x++ : x--) {
           curr_color = parseInt(Math.random() * color_length, 10);
           new_bubble = new Bubble({
             color: colors[curr_color],
@@ -12305,7 +12308,8 @@ window.jQuery = window.$ = jQuery;
       if (neighbors.length < 2) return;
       $.publish('scored', [this.calculateScore(neighbors)]);
       this.clearBubbles(neighbors);
-      return this.trigger('invalidate', this.get('bubbles'));
+      this.trigger('invalidate', this.get('bubbles'));
+      return this.checkForPossibleMoves();
     };
 
     Field.prototype.clearBubbles = function(neighbors) {
@@ -12353,9 +12357,9 @@ window.jQuery = window.$ = jQuery;
             _results2 = [];
             for (x3 = x2; x2 <= 0 ? x3 <= 0 : x3 >= 0; x2 <= 0 ? x3++ : x3--) {
               _results2.push((function() {
-                var _results3;
+                var _ref5, _results3;
                 _results3 = [];
-                for (y2 = 0; 0 <= height ? y2 <= height : y2 >= height; 0 <= height ? y2++ : y2--) {
+                for (y2 = 0, _ref5 = height - 1; 0 <= _ref5 ? y2 <= _ref5 : y2 >= _ref5; 0 <= _ref5 ? y2++ : y2--) {
                   bubble = bubbles[y2][x3];
                   bubbles[y2][x3 + 1] = bubble;
                   bubbles[y2][x3] = null;
@@ -12384,22 +12388,51 @@ window.jQuery = window.$ = jQuery;
       return bubbles.length * (bubbles.length - 1);
     };
 
-    /* Execute fn with each bubble
-    */
+    Field.prototype.checkForPossibleMoves = function() {
+      var bubbles, movesLeft,
+        _this = this;
+      movesLeft = false;
+      bubbles = this.get('bubbles');
+      this.forEachBubble(function(bubble, x, y) {
+        var color, currBubble, x2, y2, _ref;
+        color = bubble.get('color');
+        for (y2 = -1; y2 < 1; y2++) {
+          if (movesLeft) break;
+          for (x2 = -1; x2 < 1; x2++) {
+            if (!(x2 === y2 || -x2 === y2)) {
+              currBubble = (_ref = bubbles[y2 + y]) != null ? _ref[x2 + x] : void 0;
+              if (currBubble != null) {
+                if (currBubble.get('color') === color) {
+                  movesLeft = true;
+                  break;
+                  return false;
+                }
+              }
+            }
+          }
+        }
+      });
+      if (!movesLeft) return $.publish('noMoreMoves');
+    };
 
     Field.prototype.forEachBubble = function(fn) {
-      var bubble, bubbles, x, y, _ref, _results;
+      var bubble, bubbles, ret, x, y, _ref, _results;
       if (!fn) return;
       bubbles = this.get('bubbles');
       _results = [];
-      for (y = 0, _ref = this.get('height'); 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
+      for (y = 0, _ref = this.get('height') - 1; 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
         _results.push((function() {
           var _ref2, _results2;
           _results2 = [];
-          for (x = 0, _ref2 = this.get('width'); 0 <= _ref2 ? x <= _ref2 : x >= _ref2; 0 <= _ref2 ? x++ : x--) {
+          for (x = 0, _ref2 = this.get('width') - 1; 0 <= _ref2 ? x <= _ref2 : x >= _ref2; 0 <= _ref2 ? x++ : x--) {
             bubble = bubbles[y][x];
             if (bubble != null) {
-              _results2.push(fn(bubbles[y][x], x, y));
+              ret = fn(bubbles[y][x], x, y);
+              if (ret === false) {
+                break;
+              } else {
+                _results2.push(void 0);
+              }
             } else {
               _results2.push(void 0);
             }
@@ -12409,9 +12442,6 @@ window.jQuery = window.$ = jQuery;
       }
       return _results;
     };
-
-    /* Returns the array position of the current bubble
-    */
 
     Field.prototype.getArrayPosition = function(bubble) {
       var pos;

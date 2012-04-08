@@ -8,6 +8,7 @@ class exports.GameView extends Backbone.View
     @fieldView = new FieldView model: @game.field
 
     $.subscribe 'currentScore', @displayCurrentScore
+    $.subscribe 'noMoreMoves', -> alert 'Game Over'
     
     @game.bind 'change:score', @updateScoreView
 
