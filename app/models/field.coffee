@@ -36,7 +36,7 @@ class exports.Field extends Backbone.Model
     # find all neighbors
     neighbors = @getNeighborsOf bubble
 
-    $('#current_score').text "current score: #{@calculateScore neighbors}"
+    $.publish 'currentScore', [@calculateScore neighbors]
 
     return if neighbors.length < 2
 
@@ -59,8 +59,7 @@ class exports.Field extends Backbone.Model
     oldscore = @get 'score'
     score = @calculateScore neighbors
     @set score: oldscore + score
-    console.log "TODO: find a good way for showing the score"
-    $('#score').text "total  score: #{@get 'score'}"
+    $.publish 'newTotalScore', [@get 'score']
 
   clearBubbles: (neighbors) ->
     bubbles = @get 'bubbles'
