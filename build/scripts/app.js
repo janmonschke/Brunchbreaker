@@ -12163,8 +12163,8 @@ window.jQuery = window.$ = jQuery;
     }
 
     Field.prototype.defaults = {
-      width: 15,
-      height: 15,
+      width: 5,
+      height: 5,
       colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00']
     };
 
@@ -12267,7 +12267,6 @@ window.jQuery = window.$ = jQuery;
         }
         x2 = x - 1;
         if (bubbleCount === 0 && x2 >= 0) {
-          $.publish('columnKilled');
           _results.push((function() {
             var _results2;
             _results2 = [];
