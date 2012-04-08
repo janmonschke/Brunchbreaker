@@ -70,9 +70,9 @@ class exports.Field extends Backbone.Model
     width = @get 'width'
     height = @get 'height'
 
-    for y in [0..height]
-      for x in [0..width]
-        
+    # clear all vertical wholes
+    for y in [0..height-1]
+      for x in [0..width-1]
         bubble = bubbles[y][x]
         y2 = y-1 # go one up
         if not bubble and y2 >= 0
@@ -84,6 +84,29 @@ class exports.Field extends Backbone.Model
               bubble.set
                 xPos: x
                 yPos: y3+1
+
+    # clear all empty columns
+    # 1) count all bubbles in the current column
+    for x in [0..width-1]
+      bubbleCount = 0
+      for y in [0..height-1]
+        console.log x, y, bubbles[y][x]
+        if bubbles[y][x]?
+          bubbleCount++
+
+      # 2) if there are no bubbles in this column
+      # move all bubbles from there to the right
+      x2 = x-1
+      if bubbleCount == 0 and x2 >= 0
+        for x3 in [x2..0]
+          for y2 in [0..height]
+            bubble = bubbles[y2][x3]
+            bubbles[y2][x3+1] = bubble
+            bubbles[y2][x3] = null
+            if bubble
+              bubble.set
+                xPos: x3+1
+                yPos: y2
 
   calculateScore: (bubbles) ->
     bubbles.length * (bubbles.length - 1)

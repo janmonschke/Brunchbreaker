@@ -11864,11 +11864,12 @@ window.jQuery = window.$ = jQuery;
 (this.require.define({
   "views/game_view": function(exports, require, module) {
     (function() {
-  var Field, FieldView,
+  var FieldView, Game,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
-  Field = require('models/field').Field;
+  Game = require('models/game').Game;
 
   FieldView = require('views/field_view').FieldView;
 
@@ -11877,16 +11878,17 @@ window.jQuery = window.$ = jQuery;
     __extends(GameView, _super);
 
     function GameView() {
+      this.updateScoreView = __bind(this.updateScoreView, this);
       GameView.__super__.constructor.apply(this, arguments);
     }
 
     GameView.prototype.initialize = function() {
-      this.field = new Field();
+      this.game = new Game();
       this.fieldView = new FieldView({
-        model: this.field
+        model: this.game.field
       });
       $.subscribe('currentScore', this.displayCurrentScore);
-      return $.subscribe('newTotalScore', this.updateScoreView);
+      return this.game.bind('change:score', this.updateScoreView);
     };
 
     GameView.prototype.render = function() {
@@ -11898,8 +11900,8 @@ window.jQuery = window.$ = jQuery;
       return $('#current_score').text("current score: " + score);
     };
 
-    GameView.prototype.updateScoreView = function(newTotalScore) {
-      return $('#score').text("total  score: " + newTotalScore);
+    GameView.prototype.updateScoreView = function() {
+      return $('#score').text("total  score: " + (this.game.get('score')));
     };
 
     return GameView;
@@ -11936,6 +11938,14 @@ window.jQuery = window.$ = jQuery;
       'click': 'select'
     };
 
+    BubbleView.prototype.initialize = function(model, width, height) {
+      this.width = width;
+      this.height = height;
+      BubbleView.__super__.initialize.apply(this, arguments);
+      this.model.bind('change:highlighted', this.toggleHighlight);
+      return this.model.bind('change:destroyed', this.destroy);
+    };
+
     BubbleView.prototype.render = function() {
       this.$el.css({
         'background-color': this.model.get('color'),
@@ -11943,14 +11953,6 @@ window.jQuery = window.$ = jQuery;
         'height': this.height
       });
       return this;
-    };
-
-    BubbleView.prototype.initialize = function(model, width, height) {
-      this.width = width;
-      this.height = height;
-      BubbleView.__super__.initialize.apply(this, arguments);
-      this.model.bind('change:highlighted', this.toggleHighlight);
-      return this.model.bind('change:destroyed', this.destroy);
     };
 
     BubbleView.prototype.setPosition = function(x, y) {
@@ -12087,39 +12089,49 @@ window.jQuery = window.$ = jQuery;
   }
 }));
 (this.require.define({
-  "initialize": function(exports, require, module) {
-    (function() {
-  var BrunchApplication, HomeView, MainRouter,
-    __hasProp = Object.prototype.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-  BrunchApplication = require('helpers').BrunchApplication;
-
-  MainRouter = require('routers/main_router').MainRouter;
-
-  HomeView = require('views/home_view').HomeView;
-
-  exports.Application = (function(_super) {
-
-    __extends(Application, _super);
-
-    function Application() {
-      Application.__super__.constructor.apply(this, arguments);
-    }
-
-    Application.prototype.initialize = function() {
-      this.router = new MainRouter;
-      return this.homeView = new HomeView;
+  "views/templates/home": function(exports, require, module) {
+    module.exports = function(__obj) {
+  var _safe = function(value) {
+    if (typeof value === 'undefined' && value == null)
+      value = '';
+    var result = new String(value);
+    result.ecoSafe = true;
+    return result;
+  };
+  return (function() {
+    var __out = [], __self = this, _print = function(value) {
+      if (typeof value !== 'undefined' && value != null)
+        __out.push(value.ecoSafe ? value : __self.escape(value));
+    }, _capture = function(callback) {
+      var out = __out, result;
+      __out = [];
+      callback.call(this);
+      result = __out.join('');
+      __out = out;
+      return _safe(result);
     };
-
-    return Application;
-
-  })(BrunchApplication);
-
-  window.app = new exports.Application;
-
-}).call(this);
-
+    (function() {
+    
+      _print(_safe('HELLO!'));
+    
+    }).call(this);
+    
+    return __out.join('');
+  }).call((function() {
+    var obj = {
+      escape: function(value) {
+        return ('' + value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      },
+      safe: _safe
+    }, key;
+    for (key in __obj) obj[key] = __obj[key];
+    return obj;
+  })());
+};
   }
 }));
 (this.require.define({
@@ -12245,8 +12257,7 @@ window.jQuery = window.$ = jQuery;
     Field.prototype.defaults = {
       width: 15,
       height: 15,
-      colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00'],
-      score: 0
+      colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00']
     };
 
     Field.prototype.initialize = function() {
@@ -12302,23 +12313,13 @@ window.jQuery = window.$ = jQuery;
       var neighbors;
       neighbors = this.getNeighborsOf(bubble);
       if (neighbors.length < 2) return;
-      this.setNewScore(neighbors);
+      $.publish('scored', [this.calculateScore(neighbors)]);
       this.clearBubbles(neighbors);
       return this.trigger('invalidate', this.get('bubbles'));
     };
 
-    Field.prototype.setNewScore = function(neighbors) {
-      var oldscore, score;
-      oldscore = this.get('score');
-      score = this.calculateScore(neighbors);
-      this.set({
-        score: oldscore + score
-      });
-      return $.publish('newTotalScore', [this.get('score')]);
-    };
-
     Field.prototype.clearBubbles = function(neighbors) {
-      var bubble, bubbles, height, pos, width, x, y, y2, y3, _i, _len, _results;
+      var bubble, bubbleCount, bubbles, height, pos, width, x, x2, x3, y, y2, y3, _i, _len, _ref, _ref2, _ref3, _ref4, _results;
       bubbles = this.get('bubbles');
       for (_i = 0, _len = neighbors.length; _i < _len; _i++) {
         bubble = neighbors[_i];
@@ -12330,26 +12331,49 @@ window.jQuery = window.$ = jQuery;
       }
       width = this.get('width');
       height = this.get('height');
+      for (y = 0, _ref = height - 1; 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
+        for (x = 0, _ref2 = width - 1; 0 <= _ref2 ? x <= _ref2 : x >= _ref2; 0 <= _ref2 ? x++ : x--) {
+          bubble = bubbles[y][x];
+          y2 = y - 1;
+          if (!bubble && y2 >= 0) {
+            for (y3 = y2; y2 <= 0 ? y3 <= 0 : y3 >= 0; y2 <= 0 ? y3++ : y3--) {
+              bubble = bubbles[y3][x];
+              if (bubble != null) {
+                bubbles[y3 + 1][x] = bubble;
+                bubbles[y3][x] = null;
+                bubble.set({
+                  xPos: x,
+                  yPos: y3 + 1
+                });
+              }
+            }
+          }
+        }
+      }
       _results = [];
-      for (y = 0; 0 <= height ? y <= height : y >= height; 0 <= height ? y++ : y--) {
-        _results.push((function() {
-          var _results2;
-          _results2 = [];
-          for (x = 0; 0 <= width ? x <= width : x >= width; 0 <= width ? x++ : x--) {
-            bubble = bubbles[y][x];
-            y2 = y - 1;
-            if (!bubble && y2 >= 0) {
+      for (x = 0, _ref3 = width - 1; 0 <= _ref3 ? x <= _ref3 : x >= _ref3; 0 <= _ref3 ? x++ : x--) {
+        bubbleCount = 0;
+        for (y = 0, _ref4 = height - 1; 0 <= _ref4 ? y <= _ref4 : y >= _ref4; 0 <= _ref4 ? y++ : y--) {
+          console.log(x, y, bubbles[y][x]);
+          if (bubbles[y][x] != null) bubbleCount++;
+        }
+        x2 = x - 1;
+        if (bubbleCount === 0 && x2 >= 0) {
+          _results.push((function() {
+            var _results2;
+            _results2 = [];
+            for (x3 = x2; x2 <= 0 ? x3 <= 0 : x3 >= 0; x2 <= 0 ? x3++ : x3--) {
               _results2.push((function() {
                 var _results3;
                 _results3 = [];
-                for (y3 = y2; y2 <= 0 ? y3 <= 0 : y3 >= 0; y2 <= 0 ? y3++ : y3--) {
-                  bubble = bubbles[y3][x];
-                  if (bubble != null) {
-                    bubbles[y3 + 1][x] = bubble;
-                    bubbles[y3][x] = null;
+                for (y2 = 0; 0 <= height ? y2 <= height : y2 >= height; 0 <= height ? y2++ : y2--) {
+                  bubble = bubbles[y2][x3];
+                  bubbles[y2][x3 + 1] = bubble;
+                  bubbles[y2][x3] = null;
+                  if (bubble) {
                     _results3.push(bubble.set({
-                      xPos: x,
-                      yPos: y3 + 1
+                      xPos: x3 + 1,
+                      yPos: y2
                     }));
                   } else {
                     _results3.push(void 0);
@@ -12357,12 +12381,12 @@ window.jQuery = window.$ = jQuery;
                 }
                 return _results3;
               })());
-            } else {
-              _results2.push(void 0);
             }
-          }
-          return _results2;
-        })());
+            return _results2;
+          })());
+        } else {
+          _results.push(void 0);
+        }
       }
       return _results;
     };
@@ -12453,6 +12477,7 @@ window.jQuery = window.$ = jQuery;
   "models/game": function(exports, require, module) {
     (function() {
   var Field,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -12463,11 +12488,26 @@ window.jQuery = window.$ = jQuery;
     __extends(Game, _super);
 
     function Game() {
+      this.calculateScore = __bind(this.calculateScore, this);
       Game.__super__.constructor.apply(this, arguments);
     }
 
+    Game.prototype.defaults = {
+      score: 0
+    };
+
     Game.prototype.initialize = function() {
-      return this.field = new Field();
+      this.field = new Field();
+      return $.subscribe('scored', this.calculateScore);
+    };
+
+    Game.prototype.calculateScore = function(scoreToAdd) {
+      var oldscore;
+      oldscore = this.get('score');
+      this.set({
+        score: oldscore + scoreToAdd
+      });
+      return $.publish('newTotalScore', [this.get('score')]);
     };
 
     return Game;
@@ -12527,48 +12567,38 @@ window.jQuery = window.$ = jQuery;
   }
 }));
 (this.require.define({
-  "views/templates/home": function(exports, require, module) {
-    module.exports = function(__obj) {
-  var _safe = function(value) {
-    if (typeof value === 'undefined' && value == null)
-      value = '';
-    var result = new String(value);
-    result.ecoSafe = true;
-    return result;
-  };
-  return (function() {
-    var __out = [], __self = this, _print = function(value) {
-      if (typeof value !== 'undefined' && value != null)
-        __out.push(value.ecoSafe ? value : __self.escape(value));
-    }, _capture = function(callback) {
-      var out = __out, result;
-      __out = [];
-      callback.call(this);
-      result = __out.join('');
-      __out = out;
-      return _safe(result);
-    };
+  "initialize": function(exports, require, module) {
     (function() {
-    
-      _print(_safe('HELLO!'));
-    
-    }).call(this);
-    
-    return __out.join('');
-  }).call((function() {
-    var obj = {
-      escape: function(value) {
-        return ('' + value)
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;');
-      },
-      safe: _safe
-    }, key;
-    for (key in __obj) obj[key] = __obj[key];
-    return obj;
-  })());
-};
+  var BrunchApplication, HomeView, MainRouter,
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  BrunchApplication = require('helpers').BrunchApplication;
+
+  MainRouter = require('routers/main_router').MainRouter;
+
+  HomeView = require('views/home_view').HomeView;
+
+  exports.Application = (function(_super) {
+
+    __extends(Application, _super);
+
+    function Application() {
+      Application.__super__.constructor.apply(this, arguments);
+    }
+
+    Application.prototype.initialize = function() {
+      this.router = new MainRouter;
+      return this.homeView = new HomeView;
+    };
+
+    return Application;
+
+  })(BrunchApplication);
+
+  window.app = new exports.Application;
+
+}).call(this);
+
   }
 }));
