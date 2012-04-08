@@ -7,8 +7,8 @@
 - Freshman - finish 10 games
 - Pro - finish 100 games
 - Bubble Master - finish 10 games with no bubbles left
-- Bronze Medal - score 500 in a single game
-- Silver Medal - score 2000 in a single game
+- Bronze Medal - score 2000 in a single game
+- Silver Medal - score 3000 in a single game
 - Gold Medal - score 4000 in a single game
 - Orange belt - score 1000 with a single click
 - Black belt - score 2000 with a single click
