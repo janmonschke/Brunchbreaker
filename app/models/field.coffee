@@ -7,6 +7,7 @@
 # - currentScore [the score the user would currently get if he clicked]
 # - scored [the user has scored this amount of points]
 # - noMoreMoves [games over with x remaining bubbles]
+# - columnKilled [a vertical column has been deleted]
 class exports.Field extends Backbone.Model
   defaults :
     width : 15
@@ -102,6 +103,7 @@ class exports.Field extends Backbone.Model
       # move all bubbles from there to the right
       x2 = x-1
       if bubbleCount == 0 and x2 >= 0
+        $.publish 'columnKilled'
         for x3 in [x2..0]
           for y2 in [0..height-1]
             bubble = bubbles[y2][x3]
@@ -130,7 +132,6 @@ class exports.Field extends Backbone.Model
             if currBubble?
               if currBubble.get('color') == color
                 movesLeft = true
-                console.log 1
                 break # breaks the current loop since only one matching neighbor is needed
 
       return false if movesLeft # this will stop the forEachBubble execution
