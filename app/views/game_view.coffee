@@ -1,11 +1,11 @@
-{Field} = require 'models/field'
+{Game} = require 'models/game'
 {FieldView} = require 'views/field_view'
 
 class exports.GameView extends Backbone.View
 
   initialize: ->
-    @field = new Field()
-    @fieldView = new FieldView model: @field
+    @game = new Game()
+    @fieldView = new FieldView model: @game.field
 
     $.subscribe 'currentScore', @displayCurrentScore
     $.subscribe 'newTotalScore', @updateScoreView
