@@ -12092,49 +12092,41 @@ window.jQuery = window.$ = jQuery;
   }
 }));
 (this.require.define({
-  "views/templates/home": function(exports, require, module) {
-    module.exports = function(__obj) {
-  var _safe = function(value) {
-    if (typeof value === 'undefined' && value == null)
-      value = '';
-    var result = new String(value);
-    result.ecoSafe = true;
-    return result;
-  };
-  return (function() {
-    var __out = [], __self = this, _print = function(value) {
-      if (typeof value !== 'undefined' && value != null)
-        __out.push(value.ecoSafe ? value : __self.escape(value));
-    }, _capture = function(callback) {
-      var out = __out, result;
-      __out = [];
-      callback.call(this);
-      result = __out.join('');
-      __out = out;
-      return _safe(result);
-    };
+  "initialize": function(exports, require, module) {
     (function() {
-    
-      _print(_safe('HELLO!'));
-    
-    }).call(this);
-    
-    return __out.join('');
-  }).call((function() {
-    var obj = {
-      escape: function(value) {
-        return ('' + value)
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;');
-      },
-      safe: _safe
-    }, key;
-    for (key in __obj) obj[key] = __obj[key];
-    return obj;
-  })());
-};
+  var Application, BrunchApplication, HomeView, MainRouter,
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  BrunchApplication = require('helpers').BrunchApplication;
+
+  MainRouter = require('routers/main_router').MainRouter;
+
+  HomeView = require('views/home_view').HomeView;
+
+  Application = (function(_super) {
+
+    __extends(Application, _super);
+
+    function Application() {
+      Application.__super__.constructor.apply(this, arguments);
+    }
+
+    Application.prototype.initialize = function() {
+      var _ref;
+      this.router = new MainRouter;
+      this.homeView = new HomeView;
+      return this.isMobileDevice = ((_ref = navigator.userAgent.match(/(Android|webOS|iPhone|Ipod|iPad|BlackBerry|Windows Phone|ZuneWP7)/)) != null ? _ref.length : void 0) > 0;
+    };
+
+    return Application;
+
+  })(BrunchApplication);
+
+  window.BrunchBreaker = new Application();
+
+}).call(this);
+
   }
 }));
 (this.require.define({
@@ -12189,6 +12181,54 @@ window.jQuery = window.$ = jQuery;
     return BrunchApplication;
 
   })();
+
+}).call(this);
+
+  }
+}));
+(this.require.define({
+  "routers/main_router": function(exports, require, module) {
+    (function() {
+  var Game, GameView, HomeView,
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  Game = require('models/game').Game;
+
+  GameView = require('views/game_view').GameView;
+
+  HomeView = require('views/home_view').HomeView;
+
+  exports.MainRouter = (function(_super) {
+
+    __extends(MainRouter, _super);
+
+    function MainRouter() {
+      MainRouter.__super__.constructor.apply(this, arguments);
+    }
+
+    MainRouter.prototype.routes = {
+      '': 'home',
+      'home': 'home',
+      'new': 'new_game'
+    };
+
+    MainRouter.prototype.home = function() {
+      return $('body').html(new HomeView().render().el);
+    };
+
+    MainRouter.prototype.new_game = function() {
+      var game, gv;
+      game = new Game();
+      gv = new GameView({
+        model: game
+      });
+      return $('#content').html(gv.render().el);
+    };
+
+    return MainRouter;
+
+  })(Backbone.Router);
 
 }).call(this);
 
@@ -12563,89 +12603,48 @@ window.jQuery = window.$ = jQuery;
   }
 }));
 (this.require.define({
-  "routers/main_router": function(exports, require, module) {
+  "views/templates/home": function(exports, require, module) {
+    module.exports = function(__obj) {
+  var _safe = function(value) {
+    if (typeof value === 'undefined' && value == null)
+      value = '';
+    var result = new String(value);
+    result.ecoSafe = true;
+    return result;
+  };
+  return (function() {
+    var __out = [], __self = this, _print = function(value) {
+      if (typeof value !== 'undefined' && value != null)
+        __out.push(value.ecoSafe ? value : __self.escape(value));
+    }, _capture = function(callback) {
+      var out = __out, result;
+      __out = [];
+      callback.call(this);
+      result = __out.join('');
+      __out = out;
+      return _safe(result);
+    };
     (function() {
-  var Game, GameView, HomeView,
-    __hasProp = Object.prototype.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-  Game = require('models/game').Game;
-
-  GameView = require('views/game_view').GameView;
-
-  HomeView = require('views/home_view').HomeView;
-
-  exports.MainRouter = (function(_super) {
-
-    __extends(MainRouter, _super);
-
-    function MainRouter() {
-      MainRouter.__super__.constructor.apply(this, arguments);
-    }
-
-    MainRouter.prototype.routes = {
-      '': 'home',
-      'home': 'home',
-      'new': 'new_game'
-    };
-
-    MainRouter.prototype.home = function() {
-      return $('body').html(new HomeView().render().el);
-    };
-
-    MainRouter.prototype.new_game = function() {
-      var game, gv;
-      game = new Game();
-      gv = new GameView({
-        model: game
-      });
-      return $('#content').html(gv.render().el);
-    };
-
-    return MainRouter;
-
-  })(Backbone.Router);
-
-}).call(this);
-
-  }
-}));
-(this.require.define({
-  "initialize": function(exports, require, module) {
-    (function() {
-  var Application, BrunchApplication, HomeView, MainRouter,
-    __hasProp = Object.prototype.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-  BrunchApplication = require('helpers').BrunchApplication;
-
-  MainRouter = require('routers/main_router').MainRouter;
-
-  HomeView = require('views/home_view').HomeView;
-
-  Application = (function(_super) {
-
-    __extends(Application, _super);
-
-    function Application() {
-      Application.__super__.constructor.apply(this, arguments);
-    }
-
-    Application.prototype.initialize = function() {
-      var _ref;
-      this.router = new MainRouter;
-      this.homeView = new HomeView;
-      this.isMobileDevice = ((_ref = navigator.userAgent.match(/(Android|webOS|iPhone|Ipod|iPad|BlackBerry|Windows Phone|ZuneWP7)/)) != null ? _ref.length : void 0) > 0;
-      return alert(this.isMobileDevice);
-    };
-
-    return Application;
-
-  })(BrunchApplication);
-
-  window.BrunchBreaker = new Application();
-
-}).call(this);
-
+    
+      _print(_safe('HELLO!'));
+    
+    }).call(this);
+    
+    return __out.join('');
+  }).call((function() {
+    var obj = {
+      escape: function(value) {
+        return ('' + value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      },
+      safe: _safe
+    }, key;
+    for (key in __obj) obj[key] = __obj[key];
+    return obj;
+  })());
+};
   }
 }));
