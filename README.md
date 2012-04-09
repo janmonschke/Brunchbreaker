@@ -22,7 +22,8 @@
 - Vertical Tetris Master - delete 50 columns (killColumnEvent needed)
 - Rookie - finish 5 games
 - Freshman - finish 10 games
-- Pro - finish 100 games
+- Mobile User - finish 15 games on a mobile device
+- Addict - finish 100 games
 - Bubble Master - finish 10 games with no bubbles left
 - Bronze Medal - score 2000 in a single game
 - Silver Medal - score 3000 in a single game

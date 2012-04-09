@@ -12086,26 +12086,54 @@ window.jQuery = window.$ = jQuery;
   }
 }));
 (this.require.define({
-  "helpers": function(exports, require, module) {
+  "views/game_view": function(exports, require, module) {
     (function() {
+  var FieldView, Game,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
-  exports.BrunchApplication = (function() {
+  Game = require('models/game').Game;
 
-    function BrunchApplication() {
-      var _this = this;
-      jQuery(function() {
-        _this.initialize(_this);
-        return Backbone.history.start();
-      });
+  FieldView = require('views/field_view').FieldView;
+
+  exports.GameView = (function(_super) {
+
+    __extends(GameView, _super);
+
+    function GameView() {
+      this.updateScoreView = __bind(this.updateScoreView, this);
+      GameView.__super__.constructor.apply(this, arguments);
     }
 
-    BrunchApplication.prototype.initialize = function() {
-      return null;
+    GameView.prototype.initialize = function() {
+      this.game = new Game();
+      this.fieldView = new FieldView({
+        model: this.game.field
+      });
+      $.subscribe('currentScore', this.displayCurrentScore);
+      $.subscribe('noMoreMoves', function(remainingCount) {
+        return alert("Game Over with " + remainingCount + " remaining bubbles");
+      });
+      return this.game.bind('change:score', this.updateScoreView);
     };
 
-    return BrunchApplication;
+    GameView.prototype.render = function() {
+      this.$el.html(this.fieldView.render().el);
+      return this;
+    };
 
-  })();
+    GameView.prototype.displayCurrentScore = function(score) {
+      return $('#current_score').text("current score: " + score);
+    };
+
+    GameView.prototype.updateScoreView = function() {
+      return $('#score').text("total  score: " + (this.game.get('score')));
+    };
+
+    return GameView;
+
+  })(Backbone.View);
 
 }).call(this);
 
@@ -12425,7 +12453,7 @@ window.jQuery = window.$ = jQuery;
 (this.require.define({
   "initialize": function(exports, require, module) {
     (function() {
-  var BrunchApplication, HomeView, MainRouter,
+  var Application, BrunchApplication, HomeView, MainRouter,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -12435,7 +12463,7 @@ window.jQuery = window.$ = jQuery;
 
   HomeView = require('views/home_view').HomeView;
 
-  exports.Application = (function(_super) {
+  Application = (function(_super) {
 
     __extends(Application, _super);
 
@@ -12445,14 +12473,16 @@ window.jQuery = window.$ = jQuery;
 
     Application.prototype.initialize = function() {
       this.router = new MainRouter;
-      return this.homeView = new HomeView;
+      this.homeView = new HomeView;
+      this.isMobileDevice = navigator.userAgent.match(/(Android|webOS|iPhone|Ipod|iPad|BlackBerry|Windows Phone|ZuneWP7)/);
+      return alert(this.isMobileDevice);
     };
 
     return Application;
 
   })(BrunchApplication);
 
-  window.app = new exports.Application;
+  window.BrunchBreaker = new Application();
 
 }).call(this);
 
@@ -12593,54 +12623,26 @@ window.jQuery = window.$ = jQuery;
   }
 }));
 (this.require.define({
-  "views/game_view": function(exports, require, module) {
+  "helpers": function(exports, require, module) {
     (function() {
-  var FieldView, Game,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __hasProp = Object.prototype.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
-  Game = require('models/game').Game;
+  exports.BrunchApplication = (function() {
 
-  FieldView = require('views/field_view').FieldView;
-
-  exports.GameView = (function(_super) {
-
-    __extends(GameView, _super);
-
-    function GameView() {
-      this.updateScoreView = __bind(this.updateScoreView, this);
-      GameView.__super__.constructor.apply(this, arguments);
+    function BrunchApplication() {
+      var _this = this;
+      jQuery(function() {
+        _this.initialize(_this);
+        return Backbone.history.start();
+      });
     }
 
-    GameView.prototype.initialize = function() {
-      this.game = new Game();
-      this.fieldView = new FieldView({
-        model: this.game.field
-      });
-      $.subscribe('currentScore', this.displayCurrentScore);
-      $.subscribe('noMoreMoves', function(remainingCount) {
-        return alert("Game Over with " + remainingCount + " remaining bubbles");
-      });
-      return this.game.bind('change:score', this.updateScoreView);
+    BrunchApplication.prototype.initialize = function() {
+      return null;
     };
 
-    GameView.prototype.render = function() {
-      this.$el.html(this.fieldView.render().el);
-      return this;
-    };
+    return BrunchApplication;
 
-    GameView.prototype.displayCurrentScore = function(score) {
-      return $('#current_score').text("current score: " + score);
-    };
-
-    GameView.prototype.updateScoreView = function() {
-      return $('#score').text("total  score: " + (this.game.get('score')));
-    };
-
-    return GameView;
-
-  })(Backbone.View);
+  })();
 
 }).call(this);
 
