@@ -11,7 +11,7 @@ class Application extends BrunchApplication
     @homeView = new HomeView
     @isMobileDevice = navigator.userAgent.match(
       /(Android|webOS|iPhone|Ipod|iPad|BlackBerry|Windows Phone|ZuneWP7)/
-    )
+    )?.length > 0
     alert @isMobileDevice
 
 window.BrunchBreaker = new Application()
