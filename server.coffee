@@ -37,6 +37,9 @@ everyauth.helpExpress app
 everyauth.everymodule.findUserById (id, callback) ->
   User.findByCouchId id, callback
 
+# is this method needed?
+# when the user is in the req var then it is normally complete
+# good for a test run
 app.get '/user/:id', (req, res) ->
   # user needs to be logged in and to have the same id as requested
   # otherwise a user would be able to get all information of all users
