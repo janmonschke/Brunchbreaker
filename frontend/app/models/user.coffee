@@ -13,6 +13,7 @@ class exports.User extends Backbone.Model
     columnsKilled: 0 # amount of vertical columns killed
     
   initialize: ->
+    super
     @achievementManager = new AchievementManager @
 
   setGame: (@game) ->

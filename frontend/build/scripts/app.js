@@ -11960,88 +11960,43 @@ window.jQuery = window.$ = jQuery;
     
     }
   })( jQuery );(this.require.define({
-  "views/field_view": function(exports, require, module) {
+  "models/bubble": function(exports, require, module) {
     (function() {
-  var Bubble, BubbleView,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __hasProp = Object.prototype.hasOwnProperty,
+  var __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
-  Bubble = require('models/bubble').Bubble;
+  exports.Bubble = (function(_super) {
 
-  BubbleView = require('views/bubble_view').BubbleView;
+    __extends(Bubble, _super);
 
-  exports.FieldView = (function(_super) {
-
-    __extends(FieldView, _super);
-
-    function FieldView() {
-      this.updatePositions = __bind(this.updatePositions, this);
-      this.render = __bind(this.render, this);
-      FieldView.__super__.constructor.apply(this, arguments);
+    function Bubble() {
+      Bubble.__super__.constructor.apply(this, arguments);
     }
 
-    FieldView.prototype.initialize = function() {
-      FieldView.__super__.initialize.apply(this, arguments);
-      /* Important for calculation of color positions
-      */
-      this.color_width = 20;
-      this.color_height = 20;
-      this.color_padding = 3;
-      return this.model.bind('invalidate', this.updatePositions);
+    Bubble.prototype.defaults = {
+      highlighted: false,
+      destroyed: false
     };
 
-    FieldView.prototype.render = function() {
-      var bubble, bubbles, bv, colors, x, y, _ref, _ref2;
-      this.$el.html('');
-      this.bubbleViews = [];
-      colors = this.model.get('colors');
-      bubbles = this.model.get('bubbles');
-      for (y = 0, _ref = this.model.get('width') - 1; 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
-        this.bubbleViews.push([]);
-        for (x = 0, _ref2 = this.model.get('height') - 1; 0 <= _ref2 ? x <= _ref2 : x >= _ref2; 0 <= _ref2 ? x++ : x--) {
-          bubble = bubbles[y][x];
-          bv = new BubbleView({
-            model: bubble
-          }, this.color_width, this.color_height);
-          this.setViewPosition(bv, x, y);
-          this.$el.append(bv.render().el);
-          this.bubbleViews[y][x] = bv;
-        }
-      }
-      return this;
+    Bubble.prototype.unhighlight = function() {
+      return this.set({
+        highlighted: false
+      });
     };
 
-    FieldView.prototype.setViewPosition = function(view, x, y) {
-      return view.setPosition(x * this.color_width + x * this.color_padding, y * this.color_height + y * this.color_padding);
+    Bubble.prototype.highlight = function() {
+      return this.set({
+        highlighted: true
+      });
     };
 
-    FieldView.prototype.updatePositions = function(bubbles) {
-      var bubbleView, bubbleViews, x, xPos, y, yPos, _ref, _ref2, _ref3, _ref4;
-      bubbleViews = [];
-      for (y = 0, _ref = this.model.get('width') - 1; 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
-        bubbleViews.push([]);
-        for (x = 0, _ref2 = this.model.get('height') - 1; 0 <= _ref2 ? x <= _ref2 : x >= _ref2; 0 <= _ref2 ? x++ : x--) {
-          bubbleViews[y][x] = null;
-        }
-      }
-      for (y = 0, _ref3 = this.model.get('width') - 1; 0 <= _ref3 ? y <= _ref3 : y >= _ref3; 0 <= _ref3 ? y++ : y--) {
-        for (x = 0, _ref4 = this.model.get('height') - 1; 0 <= _ref4 ? x <= _ref4 : x >= _ref4; 0 <= _ref4 ? x++ : x--) {
-          bubbleView = this.bubbleViews[y][x];
-          if ((bubbleView != null) && !bubbleView.model.isDestroyed()) {
-            xPos = bubbleView.model.get('xPos');
-            yPos = bubbleView.model.get('yPos');
-            bubbleViews[yPos][xPos] = bubbleView;
-            this.setViewPosition(bubbleView, xPos, yPos);
-          }
-        }
-      }
-      return this.bubbleViews = bubbleViews;
+    Bubble.prototype.isDestroyed = function() {
+      return this.get('destroyed');
     };
 
-    return FieldView;
+    return Bubble;
 
-  })(Backbone.View);
+  })(Backbone.Model);
 
 }).call(this);
 
@@ -12083,6 +12038,7 @@ window.jQuery = window.$ = jQuery;
     };
 
     User.prototype.initialize = function() {
+      User.__super__.initialize.apply(this, arguments);
       return this.achievementManager = new AchievementManager(this);
     };
 
@@ -12280,41 +12236,119 @@ window.jQuery = window.$ = jQuery;
   }
 }));
 (this.require.define({
-  "initialize": function(exports, require, module) {
+  "views/field_view": function(exports, require, module) {
     (function() {
-  var Application, BrunchApplication, HomeView, MainRouter, User,
+  var Bubble, BubbleView,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
-  BrunchApplication = require('helpers').BrunchApplication;
+  Bubble = require('models/bubble').Bubble;
 
-  MainRouter = require('routers/main_router').MainRouter;
+  BubbleView = require('views/bubble_view').BubbleView;
 
-  HomeView = require('views/home_view').HomeView;
+  exports.FieldView = (function(_super) {
 
-  User = require('models/user').User;
+    __extends(FieldView, _super);
 
-  Application = (function(_super) {
-
-    __extends(Application, _super);
-
-    function Application() {
-      Application.__super__.constructor.apply(this, arguments);
+    function FieldView() {
+      this.updatePositions = __bind(this.updatePositions, this);
+      this.render = __bind(this.render, this);
+      FieldView.__super__.constructor.apply(this, arguments);
     }
 
-    Application.prototype.initialize = function() {
-      var _ref;
-      this.user = new User();
-      this.router = new MainRouter(this.user);
-      this.homeView = new HomeView;
-      return this.isMobileDevice = ((_ref = navigator.userAgent.match(/(Android|webOS|iPhone|Ipod|iPad|BlackBerry|Windows Phone|ZuneWP7)/)) != null ? _ref.length : void 0) > 0;
+    FieldView.prototype.initialize = function() {
+      FieldView.__super__.initialize.apply(this, arguments);
+      /* Important for calculation of color positions
+      */
+      this.color_width = 20;
+      this.color_height = 20;
+      this.color_padding = 3;
+      return this.model.bind('invalidate', this.updatePositions);
     };
 
-    return Application;
+    FieldView.prototype.render = function() {
+      var bubble, bubbles, bv, colors, x, y, _ref, _ref2;
+      this.$el.html('');
+      this.bubbleViews = [];
+      colors = this.model.get('colors');
+      bubbles = this.model.get('bubbles');
+      for (y = 0, _ref = this.model.get('width') - 1; 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
+        this.bubbleViews.push([]);
+        for (x = 0, _ref2 = this.model.get('height') - 1; 0 <= _ref2 ? x <= _ref2 : x >= _ref2; 0 <= _ref2 ? x++ : x--) {
+          bubble = bubbles[y][x];
+          bv = new BubbleView({
+            model: bubble
+          }, this.color_width, this.color_height);
+          this.setViewPosition(bv, x, y);
+          this.$el.append(bv.render().el);
+          this.bubbleViews[y][x] = bv;
+        }
+      }
+      return this;
+    };
 
-  })(BrunchApplication);
+    FieldView.prototype.setViewPosition = function(view, x, y) {
+      return view.setPosition(x * this.color_width + x * this.color_padding, y * this.color_height + y * this.color_padding);
+    };
 
-  window.BrunchBreaker = new Application();
+    FieldView.prototype.updatePositions = function(bubbles) {
+      var bubbleView, bubbleViews, x, xPos, y, yPos, _ref, _ref2, _ref3, _ref4;
+      bubbleViews = [];
+      for (y = 0, _ref = this.model.get('width') - 1; 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
+        bubbleViews.push([]);
+        for (x = 0, _ref2 = this.model.get('height') - 1; 0 <= _ref2 ? x <= _ref2 : x >= _ref2; 0 <= _ref2 ? x++ : x--) {
+          bubbleViews[y][x] = null;
+        }
+      }
+      for (y = 0, _ref3 = this.model.get('width') - 1; 0 <= _ref3 ? y <= _ref3 : y >= _ref3; 0 <= _ref3 ? y++ : y--) {
+        for (x = 0, _ref4 = this.model.get('height') - 1; 0 <= _ref4 ? x <= _ref4 : x >= _ref4; 0 <= _ref4 ? x++ : x--) {
+          bubbleView = this.bubbleViews[y][x];
+          if ((bubbleView != null) && !bubbleView.model.isDestroyed()) {
+            xPos = bubbleView.model.get('xPos');
+            yPos = bubbleView.model.get('yPos');
+            bubbleViews[yPos][xPos] = bubbleView;
+            this.setViewPosition(bubbleView, xPos, yPos);
+          }
+        }
+      }
+      return this.bubbleViews = bubbleViews;
+    };
+
+    return FieldView;
+
+  })(Backbone.View);
+
+}).call(this);
+
+  }
+}));
+(this.require.define({
+  "views/home_view": function(exports, require, module) {
+    (function() {
+  var __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  exports.HomeView = (function(_super) {
+
+    __extends(HomeView, _super);
+
+    function HomeView() {
+      HomeView.__super__.constructor.apply(this, arguments);
+    }
+
+    HomeView.prototype.id = 'home-view';
+
+    HomeView.prototype.template = require('views/templates/home');
+
+    HomeView.prototype.render = function() {
+      $(this.el).html(this.template());
+      return this;
+    };
+
+    return HomeView;
+
+  })(Backbone.View);
 
 }).call(this);
 
@@ -12374,57 +12408,47 @@ window.jQuery = window.$ = jQuery;
   }
 }));
 (this.require.define({
-  "views/home_view": function(exports, require, module) {
+  "initialize": function(exports, require, module) {
     (function() {
-  var __hasProp = Object.prototype.hasOwnProperty,
+  var Application, BrunchApplication, HomeView, MainRouter, User,
+    __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
-  exports.HomeView = (function(_super) {
+  BrunchApplication = require('helpers').BrunchApplication;
 
-    __extends(HomeView, _super);
+  MainRouter = require('routers/main_router').MainRouter;
 
-    function HomeView() {
-      HomeView.__super__.constructor.apply(this, arguments);
+  HomeView = require('views/home_view').HomeView;
+
+  User = require('models/user').User;
+
+  Application = (function(_super) {
+
+    __extends(Application, _super);
+
+    function Application() {
+      Application.__super__.constructor.apply(this, arguments);
     }
 
-    HomeView.prototype.id = 'home-view';
-
-    HomeView.prototype.template = require('views/templates/home');
-
-    HomeView.prototype.render = function() {
-      $(this.el).html(this.template());
-      return this;
+    Application.prototype.initialize = function() {
+      var _ref;
+      if (window.user_hash) {
+        this.user = new User(window.user_hash);
+        delete window.user_hash;
+        $('#user_hash').remove();
+      } else {
+        this.user = new User();
+      }
+      this.router = new MainRouter(this.user);
+      this.homeView = new HomeView;
+      return this.isMobileDevice = ((_ref = navigator.userAgent.match(/(Android|webOS|iPhone|Ipod|iPad|BlackBerry|Windows Phone|ZuneWP7)/)) != null ? _ref.length : void 0) > 0;
     };
 
-    return HomeView;
+    return Application;
 
-  })(Backbone.View);
+  })(BrunchApplication);
 
-}).call(this);
-
-  }
-}));
-(this.require.define({
-  "helpers": function(exports, require, module) {
-    (function() {
-
-  exports.BrunchApplication = (function() {
-
-    function BrunchApplication() {
-      var _this = this;
-      jQuery(function() {
-        _this.initialize(_this);
-        return Backbone.history.start();
-      });
-    }
-
-    BrunchApplication.prototype.initialize = function() {
-      return null;
-    };
-
-    return BrunchApplication;
-
-  })();
+  window.BrunchBreaker = new Application();
 
 }).call(this);
 
@@ -12485,49 +12509,6 @@ window.jQuery = window.$ = jQuery;
     return AchievementManager;
 
   })();
-
-}).call(this);
-
-  }
-}));
-(this.require.define({
-  "models/bubble": function(exports, require, module) {
-    (function() {
-  var __hasProp = Object.prototype.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-  exports.Bubble = (function(_super) {
-
-    __extends(Bubble, _super);
-
-    function Bubble() {
-      Bubble.__super__.constructor.apply(this, arguments);
-    }
-
-    Bubble.prototype.defaults = {
-      highlighted: false,
-      destroyed: false
-    };
-
-    Bubble.prototype.unhighlight = function() {
-      return this.set({
-        highlighted: false
-      });
-    };
-
-    Bubble.prototype.highlight = function() {
-      return this.set({
-        highlighted: true
-      });
-    };
-
-    Bubble.prototype.isDestroyed = function() {
-      return this.get('destroyed');
-    };
-
-    return Bubble;
-
-  })(Backbone.Model);
 
 }).call(this);
 
@@ -12814,57 +12795,6 @@ window.jQuery = window.$ = jQuery;
   }
 }));
 (this.require.define({
-  "models/game": function(exports, require, module) {
-    (function() {
-  var Field,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __hasProp = Object.prototype.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-  Field = require('models/field').Field;
-
-  exports.Game = (function(_super) {
-
-    __extends(Game, _super);
-
-    function Game() {
-      this.noMoreMoves = __bind(this.noMoreMoves, this);
-      this.calculateScore = __bind(this.calculateScore, this);
-      Game.__super__.constructor.apply(this, arguments);
-    }
-
-    Game.prototype.defaults = {
-      score: 0
-    };
-
-    Game.prototype.initialize = function() {
-      this.field = new Field();
-      this.field.bind('scored', this.calculateScore);
-      return this.field.bind('noMoreMoves', this.noMoreMoves);
-    };
-
-    Game.prototype.calculateScore = function(scoreToAdd) {
-      var oldscore;
-      oldscore = this.get('score');
-      this.set({
-        score: oldscore + scoreToAdd
-      });
-      return this.trigger('newTotalScore', this.get('score'), scoreToAdd);
-    };
-
-    Game.prototype.noMoreMoves = function(remainingBubbles) {
-      return this.trigger('gameOver', this.get('score'), remainingBubbles);
-    };
-
-    return Game;
-
-  })(Backbone.Model);
-
-}).call(this);
-
-  }
-}));
-(this.require.define({
   "views/templates/home": function(exports, require, module) {
     module.exports = function(__obj) {
   var _safe = function(value) {
@@ -12954,5 +12884,82 @@ window.jQuery = window.$ = jQuery;
     return obj;
   })());
 };
+  }
+}));
+(this.require.define({
+  "models/game": function(exports, require, module) {
+    (function() {
+  var Field,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  Field = require('models/field').Field;
+
+  exports.Game = (function(_super) {
+
+    __extends(Game, _super);
+
+    function Game() {
+      this.noMoreMoves = __bind(this.noMoreMoves, this);
+      this.calculateScore = __bind(this.calculateScore, this);
+      Game.__super__.constructor.apply(this, arguments);
+    }
+
+    Game.prototype.defaults = {
+      score: 0
+    };
+
+    Game.prototype.initialize = function() {
+      this.field = new Field();
+      this.field.bind('scored', this.calculateScore);
+      return this.field.bind('noMoreMoves', this.noMoreMoves);
+    };
+
+    Game.prototype.calculateScore = function(scoreToAdd) {
+      var oldscore;
+      oldscore = this.get('score');
+      this.set({
+        score: oldscore + scoreToAdd
+      });
+      return this.trigger('newTotalScore', this.get('score'), scoreToAdd);
+    };
+
+    Game.prototype.noMoreMoves = function(remainingBubbles) {
+      return this.trigger('gameOver', this.get('score'), remainingBubbles);
+    };
+
+    return Game;
+
+  })(Backbone.Model);
+
+}).call(this);
+
+  }
+}));
+(this.require.define({
+  "helpers": function(exports, require, module) {
+    (function() {
+
+  exports.BrunchApplication = (function() {
+
+    function BrunchApplication() {
+      var _this = this;
+      jQuery(function() {
+        _this.initialize(_this);
+        return Backbone.history.start();
+      });
+    }
+
+    BrunchApplication.prototype.initialize = function() {
+      return null;
+    };
+
+    return BrunchApplication;
+
+  })();
+
+}).call(this);
+
   }
 }));

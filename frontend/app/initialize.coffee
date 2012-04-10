@@ -8,7 +8,12 @@ class Application extends BrunchApplication
   # If you have a big application, perhaps it's a good idea to
   # group things by their type e.g. `@views = {}; @views.home = new HomeView`.
   initialize: ->
-    @user = new User()
+    if window.user_hash
+      @user = new User window.user_hash
+      delete window.user_hash
+      $('#user_hash').remove()
+    else
+      @user = new User()
     @router = new MainRouter @user
     @homeView = new HomeView
     @isMobileDevice = navigator.userAgent.match(

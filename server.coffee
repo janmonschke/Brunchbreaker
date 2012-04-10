@@ -28,10 +28,13 @@ app.configure ->
   app.use express.methodOverride()
   app.use express.bodyParser()
   app.use express.cookieParser()
-  app.use express.session(secret: '9s8dfhosn0ddsf9wbg3sv435hhd2g4')
+  app.use express.session secret: '9s8dfhosn0ddsf9wbg3sv435hhd2g4'
   app.use everyauth.middleware()
   app.use app.router
-  app.use express.static(__dirname + '/frontend/build')
+  app.set 'view engine', 'jade'
+  app.set 'views', __dirname + '/views'
+  app.set 'view options', layout: false
+  app.use express.static __dirname + '/frontend/build'
 
 everyauth.helpExpress app
 everyauth.everymodule.findUserById (id, callback) ->
@@ -51,5 +54,8 @@ app.get '/user/:id', (req, res) ->
         res.send user
   else
     res.send { error: 'You are not allowed to access this information!' }, 403
+
+app.get '/', (req, res) ->
+  res.render 'index'
 
 app.listen 3000
