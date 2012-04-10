@@ -1,23 +1,11 @@
 {
-  "author": "Your Name",
-  "name": "package-name",
-  "description": "Package description",
-  "version": "0.0.1",
-  "homepage": "",
-  "repository": {
-    "type": "git",
-    "url": ""
-  },
-  "engines": {
-    "node": "~0.6.6"
-  },
-  "scripts": {
-    "start": "brunch watch --server"
-  },
-  "dependencies": {
-    "brunch-extensions": "0.2.2"
-  },
-  "devDependencies": {
-    
-  }
+    "name": "Brunchbreaker-Server",
+    "description": "",
+    "version": "0.0.1",
+    "dependencies": { 
+        "express": "2.5.9",
+        "everyauth": "0.2.32",
+        "cradle": "0.6.3",
+        "underscore": "1.3.2"
+    }
 }
