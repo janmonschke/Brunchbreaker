@@ -58,4 +58,6 @@ app.get '/user/:id', (req, res) ->
 app.get '/', (req, res) ->
   res.render 'index'
 
+console.log 'Greatings from the server!'
+
 app.listen 3000
