@@ -1,9 +1,9 @@
-@import "reset"
 @import "mixins"
 
 body
-  background #91A2C0
+  background #1C1B1B
   font 18px "Helvetica Neue", Arial, Helvetica, sans-serif
+  color #EDDCC9
 
 ul
   list-style-type none
@@ -16,19 +16,13 @@ a:hover
   color #665248
 
 #content
-  background #FFF
   padding 20px
   position relative
-  -webkit-border-radius 4px
-  -moz-border-radius 4px
+  width 605px
+  margin 0 auto
+  margin-top 40px
+  margin-bottom 60px
   border-radius 4px
-
-/* Default font settings */
-body
-  font-size 15px
-  color #666
-  background #fff
-  font-family "KievitPro", "ff-kievit-web-pro-1","ff-kievit-web-pro-2", "Helvetica Neue", Arial, Helvetica, sans-serif
 
 /* Headings */
 h1,h2,h3,h3,h4
@@ -62,11 +56,6 @@ ul, ol
   list-style-type none
 
 /* Style */
-#content
-  width 605px
-  margin 0 auto
-  margin-top 40px
-  margin-bottom 60px
 
 #props
   position relative
@@ -79,3 +68,5 @@ ul, ol
 .bubble
   position absolute
   transition top .3s ease-in
+
+@import "bubble"

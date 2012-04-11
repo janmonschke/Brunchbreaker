@@ -11,7 +11,7 @@ class exports.Field extends Backbone.Model
   defaults :
     width : 15
     height : 15
-    colors : ['#ff0000', '#00ff00', '#0000ff', '#ffff00']
+    colors : ['color1', 'color2', 'color3', 'color4']
   
   initialize : ->
     @set 'bubbles' : @_generate_field()

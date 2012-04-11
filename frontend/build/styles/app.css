@@ -263,23 +263,11 @@ img.sticky-close
 .border-top-right, .border-top-left
   { border-top:1px solid #999; }
 .border-bottom-right, .border-bottom-left
-  { border-bottom:1px solid #999; }html{margin:0;padding:0;border:0}
-body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,code,del,dfn,em,img,q,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,dialog,figure,footer,header,hgroup,nav,section{margin:0;padding:0;border:0;font-weight:inherit;font-style:inherit;font-size:100%;font-family:inherit;vertical-align:baseline}
-article,aside,dialog,figure,footer,header,hgroup,nav,section{display:block}
-body{line-height:1.5;background:#fff}
-table{border-collapse:separate;border-spacing:0}
-caption,th,td{text-align:left;font-weight:normal;float:none}
-table,th,td{vertical-align:middle}
-blockquote:before,blockquote:after,q:before,q:after{content:''}
-blockquote,q{quotes:"" ""}
-a img{border:none}
-:focus{outline:0}
-body{background:#91a2c0;font:18px "Helvetica Neue",Arial,Helvetica,sans-serif}
+  { border-bottom:1px solid #999; }body{background:#1c1b1b;font:18px "Helvetica Neue",Arial,Helvetica,sans-serif;color:#eddcc9}
 ul{list-style-type:none}
 a,a:visited{color:#f95a5a;text-decoration:none}
 a:hover{color:#665248}
-#content{background:#fff;padding:20px;position:relative;-webkit-border-radius:4px;-moz-border-radius:4px;-moz-border-radius:4px;-webkit-border-radius:4px;border-radius:4px}
-body{font-size:15px;color:#666;background:#fff;font-family:"KievitPro","ff-kievit-web-pro-1","ff-kievit-web-pro-2","Helvetica Neue",Arial,Helvetica,sans-serif}
+#content{padding:20px;position:relative;width:605px;margin:0 auto;margin-top:40px;margin-bottom:60px;-moz-border-radius:4px;-webkit-border-radius:4px;border-radius:4px}
 h1,h2,h3,h3,h4{font-weight:normal;color:#222;clear:left}
 h1{font-size:5em;line-height:1.4;margin-bottom:.5em}
 h2{font-size:2em;line-height:1;margin-bottom:.5em}
@@ -287,20 +275,21 @@ p{margin:0 0 1.5em}
 a:focus,a:hover{color:#f95a5a;text-decoration:underline}
 a{color:#f95a5a;text-decoration:none}
 ul,ol{margin:0 1.5em 1.5em 0;list-style-type:none}
-#content{width:605px;margin:0 auto;margin-top:40px;margin-bottom:60px}
 #props{position:relative;top:36px;font-size:18px;padding-left:373px;color:#eee;font-style:italic}
 .bubble{position:absolute;-moz-transition:top .3s ease-in;-o-transition:top .3s ease-in;-webkit-transition:top .3s ease-in;transition:top .3s ease-in}
-html{margin:0;padding:0;border:0}
-body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,code,del,dfn,em,img,q,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,dialog,figure,footer,header,hgroup,nav,section{margin:0;padding:0;border:0;font-weight:inherit;font-style:inherit;font-size:100%;font-family:inherit;vertical-align:baseline}
-article,aside,dialog,figure,footer,header,hgroup,nav,section{display:block}
-body{line-height:1.5;background:#fff}
-table{border-collapse:separate;border-spacing:0}
-caption,th,td{text-align:left;font-weight:normal;float:none}
-table,th,td{vertical-align:middle}
-blockquote:before,blockquote:after,q:before,q:after{content:''}
-blockquote,q{quotes:"" ""}
-a img{border:none}
-:focus{outline:0}
+.bubble .color1{background-color:#a3e83d}
+.bubble .color2{background-color:#fbbf35}
+.bubble .color3{background-color:#5232ec}
+.bubble .color4{background-color:#f55374}
+.bubble.highlighted{cursor:pointer}
+.bubble.color1{background-color:#a3e83d;}
+.bubble.color1.highlighted{background-color:#000}
+.bubble.color2{background-color:#fbbf35;}
+.bubble.color2.highlighted{background-color:#000}
+.bubble.color3{background-color:#5232ec;}
+.bubble.color3.highlighted{background-color:#000}
+.bubble.color4{background-color:#f55374;}
+.bubble.color4.highlighted{background-color:#000}
 /* ==|== non-semantic helper classes ========================================
    Please define your styles before this section.
    ========================================================================== */

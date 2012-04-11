@@ -11,8 +11,8 @@ class exports.BubbleView extends Backbone.View
     @model.bind 'change:destroyed', @destroy
 
   render: ->
+    @$el.addClass @model.get 'color'
     @$el.css 
-      'background-color' : @model.get 'color'
       'width'            : @width
       'height'           : @height
     @
@@ -35,6 +35,6 @@ class exports.BubbleView extends Backbone.View
   toggleHighlight: =>
     highlighted = @model.get 'highlighted'
     if highlighted
-      @$el.css 'background-color' : '#000'
+      @$el.addClass 'highlighted'
     else
-      @$el.css 'background-color' : @model.get 'color'
+      @$el.removeClass 'highlighted'
