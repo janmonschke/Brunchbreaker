@@ -73,6 +73,6 @@
     return res.render('index');
   });
 
-  app.listen(3000);
+  app.listen(process.env['app_port'] || 3000);
 
 }).call(this);
