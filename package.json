@@ -2,6 +2,7 @@
     "name": "Brunchbreaker-Server",
     "description": "",
     "version": "0.0.1",
+    "node": "0.6.12",
     "dependencies": { 
         "express": "2.5.9",
         "everyauth": "0.2.32",
