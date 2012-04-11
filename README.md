@@ -1,5 +1,12 @@
 # Brunchbreaker
 
+## Farben:
+
+Layout:
+[http://kuler.adobe.com/#themeID/1832692](http://kuler.adobe.com/#themeID/1832692)
+
+Bubbles: [http://kuler.adobe.com/#themeID/1830825](http://kuler.adobe.com/#themeID/1830825)
+
 ## TODO:
 
 - User-Model
