@@ -1,5 +1,5 @@
 (function() {
-  var Promise, User, app, everyauth, express;
+  var Promise, User, app, everyauth, express, headerCheck, respondWith404;
 
   express = require('express');
 
@@ -49,15 +49,19 @@
     return User.findByCouchId(id, callback);
   });
 
+  respondWith404 = function(res, payload) {
+    return res.send(payload, 404);
+  };
+
   app.get('/user/:id', function(req, res) {
     if ((req.user != null) && req.user.fbId === req.params.id) {
       return User.findOrCreateByFacebookId({
         id: req.params.id
       }, function(err, user) {
         if (err != null) {
-          return res.send({
+          return respondWith404(res, {
             error: 'Error fetching the user.'
-          }, 404);
+          });
         } else {
           return res.send(user);
         }
@@ -67,6 +71,22 @@
         error: 'You are not allowed to access this information!'
       }, 403);
     }
+  });
+
+  headerCheck = function(req, res, next) {
+    if (req.header('Pulpception')) {
+      return next();
+    } else {
+      return respondWith404(res, {
+        error: "Invalid request"
+      });
+    }
+  };
+
+  app.get('/achievements/:id', headerCheck, function(req, res) {
+    return res.send({
+      name: 'egon'
+    });
   });
 
   app.get('/', function(req, res) {
