@@ -20,4 +20,4 @@ class Application extends BrunchApplication
       /(Android|webOS|iPhone|Ipod|iPad|BlackBerry|Windows Phone|ZuneWP7)/
     )?.length > 0
 
-window.BrunchBreaker = new Application()
+BrunchBreaker = new Application()
