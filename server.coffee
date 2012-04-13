@@ -40,6 +40,9 @@ everyauth.helpExpress app
 everyauth.everymodule.findUserById (id, callback) ->
   User.findByCouchId id, callback
 
+respondWith404 = (res, payload) ->
+  res.send payload, 404
+
 # is this method needed?
 # when the user is in the req var then it is normally complete
 # good for a test run
@@ -49,11 +52,22 @@ app.get '/user/:id', (req, res) ->
   if req.user? and req.user.fbId == req.params.id
     User.findOrCreateByFacebookId { id: req.params.id }, (err, user) ->
       if err?
-        res.send { error: 'Error fetching the user.' }, 404
+        respondWith404 res, { error: 'Error fetching the user.' }
       else
         res.send user
   else
     res.send { error: 'You are not allowed to access this information!' }, 403
+
+
+# checks for the header pulpception each time sth is changed
+headerCheck = (req, res, next) ->
+  if req.header 'Pulpception'
+    next()
+  else
+    respondWith404 res, { error: "Invalid request" }
+
+app.get '/achievements/:id', headerCheck, (req, res) ->
+  res.send { name: 'egon' }
 
 app.get '/', (req, res) ->
   res.render 'index'
