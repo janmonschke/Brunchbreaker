@@ -1,7 +1,9 @@
 @import "mixins"
 
+bodyBackground = #1C1B1B
+
 body
-  background #1C1B1B
+  background bodyBackground
   font 18px "Helvetica Neue", Arial, Helvetica, sans-serif
   color #EDDCC9
 
@@ -68,5 +70,14 @@ ul, ol
 .bubble
   position absolute
   transition top .3s ease-in
+
+#notifications
+  background #1C1B1B
+  position fixed
+  top 0
+  left 0
+  padding 5px
+  width 100%
+  display none
 
 @import "bubble"

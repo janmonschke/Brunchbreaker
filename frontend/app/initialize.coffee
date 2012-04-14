@@ -2,6 +2,7 @@
 {MainRouter} = require 'routers/main_router'
 {HomeView} = require 'views/home_view'
 {User} = require 'models/user'
+{NotificationHandler} = require 'helpers/notification_handler'
 
 class Application extends BrunchApplication
   # This callback would be executed on document ready event.
@@ -16,6 +17,7 @@ class Application extends BrunchApplication
       @user = new User()
     @router = new MainRouter @user
     @homeView = new HomeView
+    @notificationHandler = new NotificationHandler()
     @isMobileDevice = navigator.userAgent.match(
       /(Android|webOS|iPhone|Ipod|iPad|BlackBerry|Windows Phone|ZuneWP7)/
     )?.length > 0
