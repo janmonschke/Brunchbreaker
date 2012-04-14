@@ -1,7 +1,7 @@
 {AchievementManager} = require 'models/achievement_manager'
 
 class exports.User extends Backbone.Model
-  url: '/user'
+  url: -> "/user/#{@get 'id'}"
   defaults: ->
     name: "Anonymus"
     achievements: []
@@ -45,6 +45,13 @@ class exports.User extends Backbone.Model
       @set 'highestScore': score
       $.publish 'newHighestScore', [score]
 
+    $.publish 'gameOver', [score]
+
     @save()
 
-  save: ->
+  save: (data, options = {}) ->
+    return unless @has 'id'
+    # add the header to show that the request is valid
+    options.headers = 
+      'Pulpception' : '09jve9lllyxr8vgvwb98b9'
+    super
